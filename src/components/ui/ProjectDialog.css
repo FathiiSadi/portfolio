@@ -1,0 +1,288 @@
+/* Full Screen Project Detail Page */
+.project-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100% !important;
+    z-index: 2000;
+}
+
+.dialog-overlay {
+    position: absolute;
+    inset: 0;
+    background: #0F172A;
+    /* Solid dark background to hide underlying page */
+    opacity: 0;
+}
+
+/* Content Container acts as the 'Page' */
+.dialog-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #F8FAFC;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    overscroll-behavior: contain;
+}
+
+/* Close Button - Fixed */
+.dialog-close {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 2010;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.dialog-close:hover {
+    background: #ef4444;
+    color: white;
+    transform: rotate(90deg);
+    border-color: #ef4444;
+}
+
+/* === Hero Section === */
+.page-hero {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    min-height: 500px;
+    background-color: #1E293B;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    /* Align content to bottom */
+}
+
+/* Watermark Logo */
+.hero-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 800px;
+    opacity: 0.1;
+    /* Very subtle */
+    pointer-events: none;
+    filter: grayscale(100%);
+    z-index: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    color: white;
+}
+
+.page-category {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.2rem;
+    font-size: 1rem;
+    color: #94A3B8;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-weight: 600;
+}
+
+.page-title {
+    font-family: 'Made Tommy', sans-serif;
+    font-size: clamp(3.5rem, 8vw, 6rem);
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0;
+    color: #F8FAFC;
+}
+
+/* === Video Section === */
+.video-section {
+    width: 100%;
+    background-color: #0F172A;
+    /* Dark band for video */
+    padding: 4rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.video-container {
+    width: 90%;
+    max-width: 1200px;
+    aspect-ratio: 16 / 9;
+    background-color: #000;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+}
+
+.project-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* === Detail Body === */
+.page-body {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+    color: #334155;
+}
+
+.description-section {
+    margin-bottom: 5rem;
+}
+
+.description-lead {
+    font-size: 1.75rem;
+    line-height: 1.5;
+    color: #0F172A;
+    font-weight: 600;
+    margin-bottom: 2rem;
+}
+
+.description-full {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: #475569;
+}
+
+/* Metadata Grid */
+.meta-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4rem;
+    padding-top: 4rem;
+    border-top: 1px solid #E2E8F0;
+}
+
+@media (min-width: 768px) {
+    .meta-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.meta-item h4 {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    color: #64748B;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+/* Tech List */
+.tech-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.tech-pill {
+    background: transparent;
+    border: 1px solid #CBD5E1;
+    color: #475569;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.tech-pill:hover {
+    border-color: #94A3B8;
+    background: #F1F5F9;
+    color: #1E293B;
+}
+
+/* Clean Link Buttons */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .action-buttons {
+        flex-direction: row;
+    }
+}
+
+.btn-clean {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+}
+
+.btn-primary {
+    background: #0F172A;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1E293B;
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #CBD5E1;
+    color: #475569;
+}
+
+.btn-outline:hover {
+    border-color: #94A3B8;
+    color: #1E293B;
+    background: #F8FAFC;
+}
+
+/* Animation utilities */
+.reveal-text {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+    .page-hero {
+        height: 60vh;
+    }
+
+    .page-title {
+        font-size: 3rem;
+    }
+
+    .projects-section .projects-pinned-wrapper {
+        align-items: flex-start;
+        /* Better mobile view for stacked cards */
+        padding-top: 10vh;
+    }
+}

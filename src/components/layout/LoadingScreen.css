@@ -1,0 +1,154 @@
+/* Cinematic Loading Screen */
+.loading-screen-cinematic {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #F8FAFC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    overflow: hidden;
+}
+
+.loading-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+/* Cinematic Name Styling */
+.cinematic-name {
+    font-size: clamp(4rem, 15vw, 10rem);
+    font-weight: 900;
+    font-family: 'Made Tommy', sans-serif;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: #0F172A;
+    text-transform: uppercase;
+    perspective: 1000px;
+    margin-bottom: 1rem;
+}
+
+.cinematic-name div {
+    display: inline-block;
+}
+
+/* Loading Tagline */
+.loading-tagline {
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    font-weight: 400;
+    color: #64748B;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-top: 2rem;
+    animation: fadeIn 1s ease-in 1.5s both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animated Light Beams */
+.light-beam {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom,
+            transparent 0%,
+            rgba(59, 130, 246, 0.4) 50%,
+            transparent 100%);
+    opacity: 0;
+    animation: beamSweep 3s ease-in-out infinite;
+}
+
+.beam-1 {
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.beam-2 {
+    left: 50%;
+    animation-delay: 1s;
+}
+
+.beam-3 {
+    left: 80%;
+    animation-delay: 2s;
+}
+
+@keyframes beamSweep {
+
+    0%,
+    100% {
+        opacity: 0;
+        transform: translateY(-100%) scale(1, 0);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: translateY(0) scale(1, 1);
+    }
+}
+
+/* Cinematic Vignette */
+.loading-screen-cinematic::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center,
+            transparent 0%,
+            rgba(0, 0, 0, 0.4) 70%,
+            rgba(0, 0, 0, 0.8) 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Scanline Effect (Optional Film Look) */
+.loading-screen-cinematic::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg,
+            transparent 0px,
+            rgba(255, 255, 255, 0.02) 1px,
+            transparent 2px,
+            transparent 4px);
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0.15;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .cinematic-name {
+        font-size: clamp(3rem, 12vw, 6rem);
+    }
+
+    .loading-tagline {
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+    }
+}
+
+@media (max-width: 480px) {
+    .cinematic-name {
+        font-size: clamp(2.5rem, 10vw, 5rem);
+    }
+}

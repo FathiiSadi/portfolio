@@ -1,0 +1,232 @@
+.cp-section {
+    position: relative;
+    min-height: 100vh;
+    padding: 8rem 1.5rem;
+    background-color: var(--bg-dark);
+    overflow: hidden;
+}
+
+.cp-container {
+    max-width: 80rem;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+}
+
+.cp-title {
+    color: var(--text-dark);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    letter-spacing: -0.02em;
+    font-family: var(--font-display);
+}
+
+.cp-subtitle {
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 4rem;
+    font-size: 1.125rem;
+    font-family: var(--font-body);
+}
+
+/* Terminal Styles */
+.cp-terminal-wrapper {
+    position: relative;
+    max-width: 56rem;
+    margin: 0 auto;
+}
+
+.cp-terminal-header {
+    background-color: #e2e8f0;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-bottom: none;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+}
+
+.dot-red {
+    background-color: #ef4444;
+}
+
+.dot-yellow {
+    background-color: #eab308;
+}
+
+.dot-green {
+    background-color: #22c55e;
+}
+
+.terminal-filename {
+    margin-left: 1rem;
+    color: #94A3B8;
+    font-size: 0.875rem;
+    font-family: monospace;
+}
+
+.cp-terminal-body {
+    background: #0F172A;
+    /* Keep terminal dark for contrast */
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+    border: 1px solid #cbd5e1;
+    padding: 2rem;
+    font-family: monospace;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading & Error */
+.cp-loading,
+.cp-error {
+    text-align: center;
+    padding: 3rem 0;
+    color: #94A3B8;
+}
+
+.cp-error {
+    color: #ef4444;
+}
+
+.cp-loading-icon {
+    width: 2rem;
+    height: 2rem;
+    margin: 0 auto 1rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Stats Grid */
+.cp-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .cp-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.cp-stat-card {
+    background-color: rgba(30, 41, 59, 0.5);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    border: 1px solid transparent;
+}
+
+.card-blue {
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.card-purple {
+    border-color: rgba(167, 139, 250, 0.3);
+}
+
+.card-slate {
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+.stat-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.stat-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.text-blue {
+    color: #3B82F6;
+}
+
+.text-purple {
+    color: #A78BFA;
+}
+
+.text-slate {
+    color: #94A3B8;
+}
+
+.text-white {
+    color: #F8FAFC;
+}
+
+.stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-sub {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* Handle Display */
+.cp-handle-display {
+    text-align: center;
+    padding-top: 1rem;
+    margin-top: 2rem;
+    /* space-y-8 equivalent roughly */
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.cp-handle-label {
+    color: #94A3B8;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.cp-handle-link {
+    color: #3B82F6;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.cp-handle-link:hover {
+    color: #A78BFA;
+}
+
+/* Background Loop */
+.cp-bg-pattern {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.1;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: #64748B;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.code-line {
+    white-space: nowrap;
+}

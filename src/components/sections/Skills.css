@@ -1,0 +1,204 @@
+/* Skills Section Redesign */
+.skills-section {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: var(--bg-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: var(--spacing-lg) 0;
+}
+
+.skills-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    max-width: 1400px;
+    height: 80vh;
+    /* Constrain height for internal scrolling */
+    width: 100%;
+}
+
+/* LEFT PANEL - Scrollable */
+.skills-scroll-panel {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: var(--spacing-md);
+    /* Hide scrollbar but keep functionality */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+.skills-scroll-panel::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    padding-bottom: var(--spacing-xl);
+    /* Spacer at bottom */
+}
+
+.design-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+}
+
+.design-item:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.item-number {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    opacity: 0.2;
+    line-height: 1;
+}
+
+.item-title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--text-heading);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.item-description {
+    font-size: 1.1rem;
+    color: var(--text-body);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.item-points {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.item-points li {
+    font-size: 0.9rem;
+    color: var(--text-heading);
+    font-weight: 600;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.item-points li::before {
+    content: '-';
+    position: absolute;
+    left: 0;
+    color: var(--accent-primary);
+}
+
+/* RIGHT PANEL - Sticky */
+.skills-sticky-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 100%;
+}
+
+.skills-sticky-content {
+    /* Not sticky via CSS because the parent is fixed height, so it just stays centered */
+    text-align: left;
+    width: 100%;
+    /* Ensure full width for centering alignment if needed */
+}
+
+.skills-sticky-content h2 {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 6rem);
+    font-weight: 800;
+    color: var(--text-heading);
+    line-height: 1.1;
+}
+
+.skills-sticky-content .highlight {
+    /* Container for the decrypted text */
+    display: inline-block;
+}
+
+.highlight-text {
+    /* Start with stroke (transparent inner) or solid? User liked the previous look maybe? */
+    /* Previous 'highlight' class had text-stroke */
+    color: transparent;
+    -webkit-text-stroke: 2px var(--accent-highlight);
+    font-style: italic;
+    font-weight: 800;
+}
+
+/* Optional: style for encrypted characters */
+.highlight-encrypted {
+    color: var(--accent-primary);
+    opacity: 0.5;
+    font-family: var(--font-mono);
+}
+
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .skills-container {
+        gap: var(--spacing-md);
+    }
+}
+
+@media (max-width: 768px) {
+    .skills-section {
+        height: auto;
+        padding-top: var(--spacing-lg);
+    }
+
+    .skills-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+        display: flex;
+        flex-direction: column-reverse;
+        /* Text details last, Header first */
+    }
+
+    .skills-scroll-panel {
+        height: auto;
+        overflow: visible;
+        padding-right: 0;
+    }
+
+    /* Move Header to top on mobile */
+    .skills-sticky-panel {
+        height: auto;
+        padding: var(--spacing-md);
+        justify-content: flex-start;
+    }
+
+    .skills-sticky-content h2 {
+        font-size: 3rem;
+    }
+
+    .design-item {
+        padding: var(--spacing-md);
+    }
+
+    .item-number {
+        font-size: 3rem;
+    }
+}
