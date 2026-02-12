@@ -24,6 +24,11 @@ function App() {
   };
 
   useEffect(() => {
+    // Safety timeout: ensure loading screen is removed after max 3 seconds
+    const safetyTimeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+
     // Prevent scroll during loading
     if (isLoading) {
       document.body.style.overflow = 'hidden';
@@ -32,6 +37,7 @@ function App() {
     }
 
     return () => {
+      clearTimeout(safetyTimeout);
       document.body.style.overflow = 'auto';
     };
   }, [isLoading]);

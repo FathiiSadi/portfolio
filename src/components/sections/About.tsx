@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText } from 'gsap/SplitText';
 import { Briefcase, GraduationCap, Heart, Terminal } from 'lucide-react';
 import './About.css';
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger);
 
 const About: React.FC = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -110,17 +109,14 @@ const About: React.FC = () => {
                     );
                 }
 
-                // Title character-by-character reveals
+                // Title animation
                 const title = scene.querySelector('.act-title');
                 if (title) {
-                    const split = new SplitText(title, { type: 'chars' });
-                    tl.from(split.chars, {
-                        opacity: 0,
-                        x: 10,
-                        stagger: 0.015,
-                        duration: 0.6,
-                        ease: 'power2.out'
-                    }, startTime + 0.4);
+                    tl.fromTo(title,
+                        { opacity: 0, x: 20 },
+                        { opacity: 1, x: 0, duration: 0.6, ease: 'power2.out' },
+                        startTime + 0.4
+                    );
                 }
 
                 // Scene exit morph (except the absolute last one)
