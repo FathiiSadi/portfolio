@@ -5,6 +5,16 @@ import type { Project } from '../../types';
 import ProjectDialog from '../ui/ProjectDialog';
 import './Projects.css';
 
+// Import images to let Vite handle the base path
+import qalamLogo from '../../assets/images/projects/qalam-logo.jpeg';
+import qalamBg from '../../assets/images/projects/qalam-background.png';
+import fruitsLogo from '../../assets/images/projects/fruits-shops-logo.png';
+import fruitsBg from '../../assets/images/projects/fruits-shop-background.png';
+import atharLogo from '../../assets/images/projects/athar-logo.png';
+import atharBg from '../../assets/images/projects/athar-background.png';
+import amalLogo from '../../assets/images/projects/amal.png';
+import amalBg from '../../assets/images/projects/amal-background.png';
+
 gsap.registerPlugin(ScrollTrigger);
 
 const projectsData: Project[] = [
@@ -13,15 +23,15 @@ const projectsData: Project[] = [
         title: 'Qalam',
         description: 'A rule-driven scheduling system built to automate the assignment of course sections to university instructors fairly and efficiently.',
         detailedDescription: 'Qalam is a comprehensive scheduling system built to automate the assignment of course sections to university instructors fairly and efficiently. The system replaces manual coordination with a structured process based on instructor preferences, administrator-defined constraints, and FIFO-style logic to reduce conflicts and bias. The core goal is to turn a complex academic workflow into a predictable, transparent, and scalable system that saves time and ensures fairness across departments.',
-        logo: '/images/projects/qalam-logo.jpeg',
+        logo: qalamLogo,
         technologies: ['Laravel', 'PHP', 'MySQL', 'React', 'TypeScript', 'Algorithm Design', 'Filament'],
         category: 'Scheduling Logic',
         links: {
             github: '#',
             case_study: '#',
         },
-        images: ['/images/projects/qalam-background.png'],
-        backgroundImage: '/images/projects/qalam-background.png',
+        images: [qalamBg],
+        backgroundImage: qalamBg,
         videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0' // Placeholder for testing
     },
     {
@@ -29,45 +39,45 @@ const projectsData: Project[] = [
         title: 'FruitsShop',
         description: 'A full e-commerce web application designed for selling fresh produce online.',
         detailedDescription: 'FruitsShop is a full-featured e-commerce web application designed for selling fresh produce online. It focuses on clear product presentation, smooth navigation, and practical business needs such as product management and structured categories. The project demonstrates real-world application development with attention to usability, performance, and clean separation between logic and UI.',
-        logo: '/images/projects/fruits-shops-logo.png',
+        logo: fruitsLogo,
         technologies: ['Next.js', 'React', 'Node.js', 'PostgreSQL', 'TypeScript', 'Tailwind CSS'],
         category: 'E-Commerce',
         links: {
             demo: '#',
             github: '#',
         },
-        images: ['/images/projects/fruits-shop-background.png'],
-        backgroundImage: '/images/projects/fruits-shop-background.png'
+        images: [fruitsBg],
+        backgroundImage: fruitsBg
     },
     {
         id: 'athar',
         title: 'Athar',
         description: 'A minimalist blogging platform built around clarity, reading flow, and intentional design.',
         detailedDescription: 'Athar is a minimalist blogging platform built around clarity, reading flow, and intentional design. The system prioritizes content over decoration, using subtle animations and clean layouts to support long-form writing. Athar reflects a balance between technical structure and creative expression.',
-        logo: '/images/projects/athar-logo.png',
+        logo: atharLogo,
         technologies: ['Next.js', 'React', 'Markdown', 'TypeScript', 'Vercel', 'GSAP'],
         category: 'Content Platform',
         links: {
             demo: '#',
             github: '#',
         },
-        images: ['/images/projects/athar-background.png'],
-        backgroundImage: '/images/projects/athar-background.png'
+        images: [atharBg],
+        backgroundImage: atharBg
     },
     {
         id: 'amal',
         title: 'Amal',
         description: 'A RAG-powered Digital History Activist AI Agent.',
         detailedDescription: 'Amal (meaning "Hope") is a Digital History Activist AI Agent. It creates a bridge between Gen Z youth and historical knowledge using RAG-powered intelligence.',
-        logo: '/images/projects/amal.png',
+        logo: amalLogo,
         technologies: ['RAG', 'AI/ML', 'NLP', 'Python', 'Vector DB', 'React'],
         category: 'AI Agent',
         links: {
             demo: '#',
             github: '#',
         },
-        images: ['/images/projects/amal-background.png'],
-        backgroundImage: '/images/projects/amal-background.png'
+        images: [amalBg],
+        backgroundImage: amalBg
     },
 ];
 
