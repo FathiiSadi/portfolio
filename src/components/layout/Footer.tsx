@@ -1,7 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, lazy, Suspense } from 'react';
 import './Footer.css';
 
-import BouncingDownArrow from '../effects/BouncingDownArrow';
+const BouncingDownArrow = lazy(() => import('../effects/BouncingDownArrow'));
 
 const Footer: React.FC = () => {
     const footerRef = useRef<HTMLDivElement>(null);
@@ -39,7 +39,9 @@ const Footer: React.FC = () => {
         <footer ref={footerRef} className="footer-minimal">
             <div className="footer-content">
                 <div className="footer-arrow-wrapper">
-                    <BouncingDownArrow size="300px" />
+                    <Suspense fallback={<div style={{ height: '300px' }} />}>
+                        <BouncingDownArrow size="300px" />
+                    </Suspense>
                 </div>
                 <div className="footer-name-hover-wrapper">
                     <h1 className="footer-name">FATHI  <br /> AL-SADI</h1>

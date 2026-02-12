@@ -8,12 +8,12 @@ interface GlitchTextProps {
 }
 
 const GlitchText: React.FC<GlitchTextProps> = ({ text, className = "", tag: Tag = 'span' }) => {
-    return (
-        <Tag className={`glitch-wrapper glitch-hover ${className}`}>
-            <span className="glitch-text" data-text={text}>
-                {text}
-            </span>
-        </Tag>
+    return React.createElement(
+        Tag,
+        { className: `glitch-wrapper glitch-hover ${className}` },
+        <span className="glitch-text" data-text={text}>
+            {text}
+        </span>
     );
 };
 
