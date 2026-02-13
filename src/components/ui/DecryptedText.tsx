@@ -15,6 +15,7 @@ interface DecryptedTextProps extends HTMLMotionProps<"span"> {
     encryptedClassName?: string
     parentClassName?: string
     animateOn?: "view" | "hover"
+    delay?: number
 }
 
 export default function DecryptedText({
@@ -29,6 +30,7 @@ export default function DecryptedText({
     parentClassName = "",
     encryptedClassName = "",
     animateOn = "hover",
+    delay = 0,
     ...props
 }: DecryptedTextProps) {
     const [displayText, setDisplayText] = useState<string>(text)
@@ -171,18 +173,20 @@ export default function DecryptedText({
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting && !hasAnimated) {
-                        setIsHovering(true)
-                        setHasAnimated(true)
+                        setTimeout(() => {
+                            setIsHovering(true)
+                            setHasAnimated(true)
+                        }, delay)
                     }
                 })
             },
-            { threshold: 0.5 }
+            { threshold: 0.1 }
         )
 
         if (containerRef.current) observer.observe(containerRef.current)
 
         return () => observer.disconnect()
-    }, [animateOn, hasAnimated])
+    }, [animateOn, hasAnimated, delay])
 
     const hoverProps =
         animateOn === "hover"

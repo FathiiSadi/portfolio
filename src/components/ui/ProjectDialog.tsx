@@ -93,14 +93,23 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({ project, isOpen, onClose 
                 {project.videoUrl && (
                     <div className="video-section reveal-text">
                         <div className="video-container">
-                            <iframe
-                                src={project.videoUrl}
-                                title={project.title}
-                                className="project-video"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            ></iframe>
+                            {project.videoUrl.includes('youtube.com') || project.videoUrl.includes('youtu.be') ? (
+                                <iframe
+                                    src={project.videoUrl}
+                                    title={project.title}
+                                    className="project-video"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                ></iframe>
+                            ) : (
+                                <video
+                                    src={project.videoUrl}
+                                    controls
+                                    className="project-video"
+                                    style={{ width: '100%', borderRadius: '12px' }}
+                                />
+                            )}
                         </div>
                     </div>
                 )}

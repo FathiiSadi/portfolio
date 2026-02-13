@@ -16,42 +16,46 @@ const About: React.FC = () => {
             id: 'act-1',
             title: "The Foundation",
             icon: <GraduationCap className="act-icon" size={32} />,
-            description: "My journey began with a curiosity for how systems communicate. At An-Najah National University, I didn't just study computer engineering—I learned to build the future.",
+            description: "My journey began with a curiosity about how systems communicate and scale. At Al Hussein Technical University, I didn’t just study computer science...I trained myself to think in algorithms, architecture, and real-world execution.",
             sidebar: [
-                { label: "Education", value: "B.Sc. in Computer Engineering", sub: "An-Najah National University" },
-                { label: "Focus", value: "System Architecture", sub: "Building reliable foundations" }
+                { label: "Education", value: "Bachelor of Computer Science", sub: "Al Hussein Technical University" },
+                { label: "Focus", value: "System Architecture", sub: "Building real world projects" }
             ],
             watermark: "Foundation"
         },
         {
             id: 'act-2',
-            title: "The Execution",
+            title: "The Builder",
             icon: <Briefcase className="act-icon" size={32} />,
-            description: "Translating complex requirements into high-performance reality. From leading backend optimizations at TBI to crafting interactive experiences at Tech Innovators.",
+            description: "Translating complex requirements into high-performance systems became my focus. From building scalable backend services to delivering full-stack applications, I learned that clean architecture is what turns code into longevity.",
             sidebar: [
-                { label: "Recent Role", value: "Software Engineer", sub: "Technical Bureau for Information" },
-                { label: "Impact", value: "Scalable PHP Architectures", sub: "Driving efficiency at scale" }
+                { label: "Recent Role", value: "Software Engineer", sub: "Altibbi" },
+                {
+                    label: "Impact", value: "Backend Architecture & Scalable APIs", sub: "Full-stack implementation with Laravel & Vue.js"
+                }
             ],
-            watermark: "Execution"
+            watermark: "Builder"
         },
         {
             id: 'act-3',
-            title: "The Connection",
+            title: "The Mindset",
             icon: <Heart className="act-icon" size={32} />,
-            description: "I believe technology is at its best when it's shared. Mentoring the next generation of engineers and organizing tech hubs is where I find my 'Why'.",
+            description: "For me, engineering is structured thinking. Before writing code, I think in trade-offs, constraints, and long-term maintainability. I value clarity over cleverness, simplicity over noise, and systems that survive real-world pressure.",
             sidebar: [
-                { label: "Community", value: "Technical Mentor", sub: "Local Coding Bootcamps" },
-                { label: "Leadership", value: "Hub Organizer", sub: "Fostering collaboration" }
+                { label: "Approach", value: "Problem Decomposition", sub: "Transforming complexity into clear architecture" },
+                {
+                    label: "Engineering Values", value: "Maintainability • Performance • Scalability", sub: "Code that lasts beyond version one"
+                }
             ],
-            watermark: "Connection"
+            watermark: "Impact"
         },
         {
             id: 'act-4',
-            title: "The Mindset",
+            title: "The Direction",
             icon: <Terminal className="act-icon" size={32} />,
-            description: "I don't just solve problems—I anticipate them. My philosophy is rooted in technical precision balanced with user-centered thinking.",
-            tags: ["Algorithm Design", "System Optimization", "Deep Focus", "Code Integrity", "Strategic Planning"],
-            watermark: "Mindset"
+            description: "Now, I’m focused on mastering system design, performance, and large-scale engineering. The goal is simple: build products that scale globally and stand the test of time.",
+            tags: ["Algorithm Design", "System Design", "Performance Optimization", "Strategic Planning"],
+            watermark: "Direction"
         }
     ];
 

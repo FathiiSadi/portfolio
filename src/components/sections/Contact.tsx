@@ -116,21 +116,17 @@ const Contact: React.FC = () => {
                         </p>
 
                         <div ref={linksRef} className="social-links">
-                            <a href="mailto:fathi@example.com" className="social-link">
+                            <a href="mailto:fathii.alsadi@gmail.com" className="social-link">
                                 <span className="link-icon">✉</span>
                                 <span className="link-text">Email</span>
                             </a>
-                            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-link">
+                            <a href="https://www.linkedin.com/in/fathi-sadi/" target="_blank" rel="noopener noreferrer" className="social-link">
                                 <span className="link-icon">in</span>
                                 <span className="link-text">LinkedIn</span>
                             </a>
-                            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="social-link">
+                            <a href="https://github.com/FathiiSadi" target="_blank" rel="noopener noreferrer" className="social-link">
                                 <span className="link-icon">git</span>
                                 <span className="link-text">GitHub</span>
-                            </a>
-                            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-link">
-                                <span className="link-icon">𝕏</span>
-                                <span className="link-text">Twitter</span>
                             </a>
                         </div>
                     </div>

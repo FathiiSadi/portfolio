@@ -171,21 +171,12 @@
         padding: 2rem;
     }
 
-    .footer-name {
-        font-size: clamp(3rem, 15vw, 8rem);
-    }
-
     .footer-year {
         margin-top: 2rem;
         font-size: 0.875rem;
     }
 }
 
-@media (max-width: 480px) {
-    .footer-name {
-        font-size: clamp(2.5rem, 12vw, 6rem);
-    }
-}
 
 /* Border */
 .footer-minimal {

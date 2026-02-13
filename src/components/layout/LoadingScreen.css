@@ -134,21 +134,3 @@
     z-index: 3;
     opacity: 0.15;
 }
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .cinematic-name {
-        font-size: clamp(3rem, 12vw, 6rem);
-    }
-
-    .loading-tagline {
-        font-size: 0.8rem;
-        letter-spacing: 0.2em;
-    }
-}
-
-@media (max-width: 480px) {
-    .cinematic-name {
-        font-size: clamp(2.5rem, 10vw, 5rem);
-    }
-}

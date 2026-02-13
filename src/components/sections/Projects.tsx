@@ -35,10 +35,10 @@ const projectsData: Project[] = [
         videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0' // Placeholder for testing
     },
     {
-        id: 'fruitsshop',
-        title: 'FruitsShop',
+        id: 'FRUTIA',
+        title: 'FRUTIA',
         description: 'A full e-commerce web application designed for selling fresh produce online.',
-        detailedDescription: 'FruitsShop is a full-featured e-commerce web application designed for selling fresh produce online. It focuses on clear product presentation, smooth navigation, and practical business needs such as product management and structured categories. The project demonstrates real-world application development with attention to usability, performance, and clean separation between logic and UI.',
+        detailedDescription: 'FRUTIA is a full-featured e-commerce web application designed for selling fresh produce online. It focuses on clear product presentation, smooth navigation, and practical business needs such as product management and structured categories. The project demonstrates real-world application development with attention to usability, performance, and clean separation between logic and UI.',
         logo: fruitsLogo,
         technologies: ['Next.js', 'React', 'Node.js', 'PostgreSQL', 'TypeScript', 'Tailwind CSS'],
         category: 'E-Commerce',
@@ -93,63 +93,98 @@ const Projects: React.FC = () => {
         const container = containerRef.current;
         const totalProjects = projectsData.length;
 
-        const cards = gsap.utils.toArray('.project-card-stacked') as HTMLElement[];
-        const bgs = gsap.utils.toArray('.project-bg') as HTMLElement[];
-
-        // Initial States
-        gsap.set(cards, { xPercent: 100, opacity: 0 }); // Start right
-        gsap.set(bgs, { opacity: 0, scale: 1.2 });
-
-        // Set first project active
-        gsap.set(cards[0], { xPercent: 0, opacity: 1 });
-        gsap.set(bgs[0], { opacity: 1, scale: 1 });
+        const bgs = gsap.utils.toArray('.project-bg-container') as HTMLElement[];
+        const titles = gsap.utils.toArray('.project-fancy-title-wrapped') as HTMLElement[];
+        const individualCards = gsap.utils.toArray('.project-card-wrapper') as HTMLElement[];
+        const cardsTrack = (gsap.utils.toArray('.projects-cards-track') as HTMLElement[])[0];
 
         const ctx = gsap.context(() => {
-            const tl = gsap.timeline({
+            const masterTl = gsap.timeline({
                 scrollTrigger: {
                     trigger: container,
                     start: 'top top',
-                    end: `+=${totalProjects * 100}%`, // Scroll distance
+                    end: `+=${totalProjects * 200}%`, // Slower scroll (user might have changed it to 100%, I'll stick to 200% for smooth feel as requested)
                     pin: true,
-                    scrub: 1,
-                    anticipatePin: 1
+                    scrub: 1.5,
+                    anticipatePin: 1,
+                    snap: {
+                        snapTo: 1 / (totalProjects - 1),
+                        duration: { min: 0.2, max: 0.5 },
+                        delay: 0,
+                        ease: "power1.inOut"
+                    }
                 }
             });
 
-            // Iterate logic
+            // Set initial states
+            gsap.set(bgs.slice(1), { opacity: 0, scale: 1.1 });
+            gsap.set(titles.slice(1), { opacity: 0, scale: 0.8 });
+
+            // Create a sequence that allows "dwell" time at each project
             projectsData.forEach((_, i) => {
-                if (i === projectsData.length - 1) return; // Last one just stays
+                const stepTl = gsap.timeline();
 
-                // Exit current card
-                tl.to(cards[i], {
-                    xPercent: -120,
-                    opacity: 0,
-                    rotation: -5,
-                    duration: 1,
-                    ease: "power2.inOut"
-                }, `slide-${i}`);
+                // 1. Dwell Phase (with Card Drift)
+                // Even when "pinned", we move the card slightly to give it life
+                stepTl.to(individualCards[i], {
+                    x: -50, // Drift left slightly
+                    duration: 1.5,
+                    ease: "none"
+                }, 0);
 
-                // Exit current BG - Zoom in and fade out
-                tl.to(bgs[i], {
-                    opacity: 0,
-                    scale: 1.5,
-                    duration: 1,
-                    ease: "power2.inOut"
-                }, `slide-${i}`);
+                if (i < totalProjects - 1) {
+                    // 2. Transition Phase
+                    const transitionTl = gsap.timeline();
 
-                // Enter next card
-                tl.fromTo(cards[i + 1],
-                    { xPercent: 120, opacity: 0, rotation: 5 },
-                    { xPercent: 0, opacity: 1, rotation: 0, duration: 1, ease: "power2.inOut" },
-                    `slide-${i}-=0.2` // Overlap slightly
-                );
+                    // Main track shift
+                    transitionTl.to(cardsTrack, {
+                        xPercent: -100 * (i + 1),
+                        duration: 1,
+                        ease: "power2.inOut"
+                    }, 0);
 
-                // Enter next BG - Zoom out from large
-                tl.fromTo(bgs[i + 1],
-                    { opacity: 0, scale: 1.2 },
-                    { opacity: 1, scale: 1, duration: 1, ease: "power2.inOut" },
-                    `slide-${i}-=0.2`
-                );
+                    // Drift for entering card
+                    transitionTl.fromTo(individualCards[i + 1],
+                        { x: 100 },
+                        { x: 50, duration: 0.3, ease: "power2.inOut" },
+                        0
+                    );
+
+                    // Fade backgrounds
+                    transitionTl.to(bgs[i], {
+                        opacity: 0,
+                        scale: 1.2,
+                        duration: 0.6,
+                        ease: "power2.inOut"
+                    }, 0);
+                    transitionTl.to(bgs[i + 1], {
+                        opacity: 1,
+                        scale: 1,
+                        duration: 0.6,
+                        ease: "power2.inOut"
+                    }, 0);
+
+                    // Fade/Move titles
+                    transitionTl.to(titles[i], {
+                        opacity: 0,
+                        scale: 1.2,
+                        y: -80,
+                        duration: 0.5,
+                        ease: "power2.inOut"
+                    }, 0);
+                    transitionTl.fromTo(titles[i + 1],
+                        { opacity: 0, scale: 0.7, y: 80 },
+                        { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.2)" },
+                        0.2
+                    );
+
+                    stepTl.add(transitionTl);
+                } else {
+                    // Last project drift
+                    stepTl.to(individualCards[i], { x: -50, duration: 0.6 });
+                }
+
+                masterTl.add(stepTl);
             });
 
         }, container);
@@ -168,64 +203,64 @@ const Projects: React.FC = () => {
     };
 
     return (
-        <section ref={containerRef} className="projects-section" style={{ height: '100vh' }}>
+        <section ref={containerRef} className="projects-section">
             <div ref={wrapperRef} className="projects-pinned-wrapper">
 
-                {/* Background Layer */}
-                <div className="projects-bg-layer">
+                {/* 1. Background Layer (Fixed) */}
+                <div className="projects-bg-stacked">
                     {projectsData.map((project) => (
                         <div
                             key={`bg-${project.id}`}
-                            className="project-bg"
-                            style={{
-                                backgroundImage: `url('${project.backgroundImage || ''}')`
-                            }}
-                        />
+                            className="project-bg-container"
+                            style={{ backgroundImage: `url('${project.backgroundImage || ''}')` }}
+                        >
+                            <div className="bg-overlay"></div>
+                        </div>
                     ))}
                 </div>
 
-                {/* Card Layer */}
-                <div className="projects-card-layer">
+                {/* 2. Title Layer (Fixed) */}
+                <div className="projects-titles-stacked">
                     {projectsData.map((project) => (
-                        <div
-                            key={`card-${project.id}`}
-                            className="project-card-stacked"
-                            onClick={() => handleProjectClick(project)}
-                        >
-                            {/* Card Bkg - Use LOGO or CARD image, distinct from section BG */}
-                            <img
-                                src={project.logo || ''}
-                                alt={project.title}
-                                className="card-bg-image"
-                                style={{ objectFit: 'cover' }}
-                            />
+                        <div key={`title-${project.id}`} className="project-fancy-title-wrapped">
+                            <h2 className="project-fancy-title">{project.title}</h2>
+                        </div>
+                    ))}
+                </div>
 
-                            <div className="card-overlay"></div>
+                <div className="projects-vignette"></div>
 
-                            {/* Scanline/Glitch Effect Overlay */}
-                            <div className="card-scanline"></div>
-
-                            <div className="card-content">
-                                <div className="card-top">
-                                    <span className="card-category">{project.category}</span>
-                                </div>
-
-                                {/* Center (empty now, used for interactions) */}
-                                <div className="card-center"></div>
-
-                                <div className="card-bottom">
-                                    <h3 className="card-title">{project.title}</h3>
-
-                                    {/* Tech Stack Slider (Reveals on Hover) */}
-                                    <div className="card-tech-strip">
-                                        <div className="tech-marquee">
-                                            {project.technologies.slice(0, 4).join(' • ')}
+                {/* 3. Card Layer (Sliding) */}
+                <div className="projects-cards-container">
+                    <div className="projects-cards-track">
+                        {projectsData.map((project) => (
+                            <div key={`slide-${project.id}`} className="project-slide">
+                                <div className="project-card-wrapper" onClick={() => handleProjectClick(project)}>
+                                    <div className="project-card-full">
+                                        <div className="card-media-full">
+                                            {project.videoUrl && !project.videoUrl.includes('youtube.com') ? (
+                                                <video
+                                                    src={project.videoUrl}
+                                                    muted
+                                                    loop
+                                                    playsInline
+                                                    autoPlay
+                                                    className="full-video"
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={project.logo || project.backgroundImage || ''}
+                                                    alt={project.title}
+                                                    className="full-image"
+                                                />
+                                            )}
+                                            <div className="card-minimal-overlay"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
 
