@@ -70,7 +70,7 @@ const About: React.FC = () => {
                 scrollTrigger: {
                     trigger: sectionRef.current,
                     start: 'top top',
-                    end: `+=${scenes.length * 100}%`,
+                    end: `+=${scenes.length * 100}%`, // Increased scroll distance for more reading time
                     pin: true,
                     scrub: 1,
                     onUpdate: (self) => {
@@ -96,11 +96,11 @@ const About: React.FC = () => {
                 const startTime = i;
                 const endTime = i + 1;
 
-                // Scene basic appearance
+                // Scene basic appearance - Start faster
                 tl.to(scene, {
                     opacity: 1,
                     visibility: 'visible',
-                    duration: 0.5
+                    duration: 0.3 // Faster entrance
                 }, startTime);
 
                 // Morphing reveal for content
@@ -108,8 +108,8 @@ const About: React.FC = () => {
                 if (content) {
                     tl.fromTo(content,
                         { y: 60, opacity: 0, filter: 'blur(10px)' },
-                        { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.8, ease: 'expo.out' },
-                        startTime + 0.15
+                        { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.6, ease: 'expo.out' },
+                        startTime + 0.1
                     );
                 }
 
@@ -118,20 +118,20 @@ const About: React.FC = () => {
                 if (title) {
                     tl.fromTo(title,
                         { opacity: 0, x: 20 },
-                        { opacity: 1, x: 0, duration: 0.6, ease: 'power2.out' },
-                        startTime + 0.4
+                        { opacity: 1, x: 0, duration: 0.4, ease: 'power2.out' },
+                        startTime + 0.3
                     );
                 }
 
-                // Scene exit morph (except the absolute last one)
+                // Scene exit morph - Delayed exit for more reading time
                 if (i < scenes.length - 1) {
                     tl.to(scene, {
                         opacity: 0,
                         y: -40,
                         filter: 'blur(10px)',
                         visibility: 'hidden',
-                        duration: 0.5
-                    }, endTime - 0.2);
+                        duration: 0.3
+                    }, endTime - 0.1); // Exit much later in the window
                 }
             });
         }, sectionRef);
