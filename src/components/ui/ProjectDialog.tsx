@@ -59,6 +59,12 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({ project, isOpen, onClose 
         });
     };
 
+    const getEmbedUrl = (url: string) => {
+        if (url.includes('drive.google.com')) {
+            return url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+        }
+        return url;
+    };
     if (!isOpen || !project) return null;
 
     return (
@@ -93,9 +99,9 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({ project, isOpen, onClose 
                 {project.videoUrl && (
                     <div className="video-section reveal-text">
                         <div className="video-container">
-                            {project.videoUrl.includes('youtube.com') || project.videoUrl.includes('youtu.be') ? (
+                            {project.videoUrl.includes('youtube.com') || project.videoUrl.includes('youtu.be') || project.videoUrl.includes('drive.google.com') ? (
                                 <iframe
-                                    src={project.videoUrl}
+                                    src={getEmbedUrl(project.videoUrl)}
                                     title={project.title}
                                     className="project-video"
                                     frameBorder="0"
@@ -131,26 +137,28 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({ project, isOpen, onClose 
                             </div>
                         </div>
 
-                        <div className="meta-item">
-                            <h4>Links</h4>
-                            <div className="action-buttons">
-                                {project.links.demo && (
-                                    <a href={project.links.demo} target="_blank" rel="noreferrer" className="btn-clean btn-primary">
-                                        View Live Site
-                                    </a>
-                                )}
-                                {project.links.github && (
-                                    <a href={project.links.github} target="_blank" rel="noreferrer" className="btn-clean btn-outline">
-                                        GitHub Repo
-                                    </a>
-                                )}
-                                {project.links.case_study && (
-                                    <a href={project.links.case_study} target="_blank" rel="noreferrer" className="btn-clean btn-outline">
-                                        Read Case Study
-                                    </a>
-                                )}
+                        {(project.links.demo || project.links.github || project.links.case_study) && (
+                            <div className="meta-item">
+                                <h4>Links</h4>
+                                <div className="action-buttons">
+                                    {project.links.demo && (
+                                        <a href={project.links.demo} target="_blank" rel="noreferrer" className="btn-clean btn-primary">
+                                            View Live Site
+                                        </a>
+                                    )}
+                                    {project.links.github && (
+                                        <a href={project.links.github} target="_blank" rel="noreferrer" className="btn-clean btn-outline">
+                                            GitHub Repo
+                                        </a>
+                                    )}
+                                    {project.links.case_study && (
+                                        <a href={project.links.case_study} target="_blank" rel="noreferrer" className="btn-clean btn-outline">
+                                            Read Case Study
+                                        </a>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>

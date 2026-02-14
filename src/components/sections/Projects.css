@@ -141,7 +141,8 @@
 }
 
 .full-image,
-.full-video {
+.full-video,
+.full-video-iframe {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -149,7 +150,8 @@
 }
 
 .project-card-wrapper:hover .full-image,
-.project-card-wrapper:hover .full-video {
+.project-card-wrapper:hover .full-video,
+.project-card-wrapper:hover .full-video-iframe {
     transform: scale(1.1);
 }
 
