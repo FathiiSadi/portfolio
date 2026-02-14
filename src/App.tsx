@@ -14,7 +14,7 @@ const Skills = lazy(() => import('./components/sections/Skills'));
 const InteractiveSkills = lazy(() => import('./components/sections/InteractiveSkills'));
 const Projects = lazy(() => import('./components/sections/Projects'));
 const CompetitiveProgramming = lazy(() => import('./components/sections/CompetitiveProgramming'));
-// const Contact = lazy(() => import('./components/sections/Contact'));
+const Contact = lazy(() => import('./components/sections/Contact'));
 
 function App() {
   const [isLoading, setIsLoading] = useState(true); // Re-enabled with short duration
@@ -59,7 +59,7 @@ function App() {
               <InteractiveSkills />
               <div id="projects"><Projects /></div>
               <div id="competitive"><CompetitiveProgramming /></div>
-              {/* <Contact /> */}
+              <div id="contact"><Contact /></div>
             </Suspense>
             <Footer />
           </main>
