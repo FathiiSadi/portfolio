@@ -1,218 +1,921 @@
 .about {
     position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     background: var(--bg-main);
     color: var(--text-heading);
-    overflow: hidden;
+    font-family: var(--font-stack);
+    isolation: isolate;
 }
 
-.about-viewport {
-    height: 100vh;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Layered Background - Continuous Scrolling Strip */
-.about-parallax-layer {
+/* Subtle grid overlay for "lab floor" feel */
+.about::before {
+    content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
+    background-image: linear-gradient(var(--border-light) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-light) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.35;
     pointer-events: none;
-    z-index: 1;
-    overflow: hidden;
+    z-index: 0;
 }
 
-.bg-watermark-strip {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    /* Height will be managed by content or GSAP if needed, 
-       but we can use standard vh units here */
-}
-
-.bg-watermark-slot {
-    height: 100vh;
-    width: 100%;
+/* ── Top bar ──────────────────────────────────────────────────── */
+.lab-topbar {
     display: flex;
     align-items: center;
-    justify-content: center;
-}
-
-.bg-text-watermark {
-    font-size: clamp(8rem, 25vw, 35rem);
-    font-weight: 900;
-    line-height: 1;
-    color: rgba(0, 0, 0, 0.03);
-    white-space: nowrap;
-    text-transform: uppercase;
-    user-select: none;
-    opacity: 0.1;
-    /* Base opacity, will be animated */
-}
-
-/* Acts / Scenes - Central Content */
-.about-scene {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 var(--spacing-md);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.about-scene.active {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
-
-.scene-content {
-    max-width: 1200px;
-    width: 100%;
+    justify-content: space-between;
+    padding: 0.75rem 2.5rem;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-card);
+    flex-shrink: 0;
     position: relative;
-    z-index: 2;
-}
-
-.act-header {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.act-number {
-    font-size: 0.875rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.4em;
-    color: var(--primary-blue);
-}
-
-.act-icon {
-    color: var(--primary-blue);
-    opacity: 0.8;
-}
-
-.act-title {
-    font-size: clamp(3rem, 8vw, 6rem);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    margin-bottom: 4rem;
-    text-transform: uppercase;
-}
-
-.act-description {
-    font-size: clamp(1.125rem, 2.5vw, 1.75rem);
-    line-height: 1.4;
-    color: var(--text-body);
-    max-width: 800px;
-    margin-bottom: 3rem;
-}
-
-/* Narrative Elements */
-.narrative-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 4rem;
-    align-items: start;
-}
-
-.narrative-item {
-    margin-bottom: 3rem;
-}
-
-.narrative-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--text-muted);
-    margin-bottom: 1rem;
-    display: block;
-}
-
-.narrative-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-heading);
-}
-
-.narrative-sub {
-    font-size: 1rem;
-    color: var(--text-muted);
-    margin-top: 0.5rem;
-}
-
-/* Problem Solving Tags */
-.thought-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-}
-
-.thought-tag {
-    font-size: clamp(1.5rem, 4vw, 3rem);
-    font-weight: 700;
-    color: rgba(15, 23, 42, 0.1);
-    transition: all 0.4s var(--ease-smooth);
-    cursor: default;
-}
-
-.thought-tag:hover {
-    color: var(--primary-blue);
-    transform: scale(1.1);
-}
-
-/* Progress Indicator */
-.story-progress {
-    position: absolute;
-    right: 3rem;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
     z-index: 10;
 }
 
-.progress-dot {
+.lab-topbar__left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.lab-topbar__led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10B981;
+    flex-shrink: 0;
+    animation: led-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes led-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+
+    50% {
+        opacity: 0.7;
+        box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+    }
+}
+
+.lab-topbar__label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-heading);
+    text-transform: uppercase;
+}
+
+.lab-topbar__divider {
+    color: var(--text-muted);
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.78rem;
+    opacity: 0.4;
+}
+
+.lab-topbar__sub {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+}
+
+.lab-topbar__right {
+    display: flex;
+    align-items: center;
+}
+
+.lab-topbar__hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.lab-topbar__hint-dot {
     width: 6px;
     height: 6px;
-    background: var(--border-light);
     border-radius: 50%;
-    transition: all 0.3s ease;
+    border: 1.5px solid var(--accent-primary);
+    animation: hint-ring 1.5s ease-in-out infinite;
+}
+
+@keyframes hint-ring {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 1;
+    }
+}
+
+.lab-topbar__progress {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.68rem;
+    color: var(--accent-secondary);
+    letter-spacing: 0.06em;
+}
+
+/* ── Workspace area ───────────────────────────────────────────── */
+.lab-workspace {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Desk surface ─────────────────────────────────────────────── */
+.lab-desk {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.lab-desk__surface {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: var(--bg-section);
+}
+
+/* Wood-grain texture lines (subtle) */
+.lab-desk__wood-grain {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(92deg,
+            transparent,
+            transparent 48px,
+            rgba(203, 213, 225, 0.15) 48px,
+            rgba(203, 213, 225, 0.15) 49px);
+    pointer-events: none;
+}
+
+/* Bottom edge shadow - desk depth illusion */
+.lab-desk__edge-shadow {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.06));
+    pointer-events: none;
+}
+
+/* ── Objects container ────────────────────────────────────────── */
+.lab-desk__objects {
+    position: absolute;
+    inset: 0;
+}
+
+/* ── Continuous floating animation ─────────────────────────────── */
+@keyframes float-a {
+
+    0%,
+    100% {
+        transform: rotate(var(--rot, 0deg)) translateY(0px);
+    }
+
+    50% {
+        transform: rotate(var(--rot, 0deg)) translateY(-8px);
+    }
+}
+
+@keyframes float-b {
+
+    0%,
+    100% {
+        transform: rotate(var(--rot, 0deg)) translateY(-6px);
+    }
+
+    50% {
+        transform: rotate(var(--rot, 0deg)) translateY(4px);
+    }
+}
+
+@keyframes float-c {
+
+    0%,
+    100% {
+        transform: rotate(var(--rot, 0deg)) translateY(-3px);
+    }
+
+    50% {
+        transform: rotate(var(--rot, 0deg)) translateY(7px);
+    }
+}
+
+/* ── Individual lab object ────────────────────────────────────── */
+.lab-object {
+    position: absolute;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transform-origin: center center;
+    transition: filter 0.35s var(--ease-smooth);
+    /* Floating animation — pauses on hover to signal interactivity */
+    animation: float-a 4s ease-in-out infinite;
+    animation-play-state: running;
+}
+
+/* Stagger float timing per object type */
+.lab-object--laptop {
+    animation-name: float-a;
+    animation-duration: 4.2s;
+}
+
+.lab-object--notebook {
+    animation-name: float-b;
+    animation-duration: 3.8s;
+    animation-delay: -1.1s;
+}
+
+.lab-object--server {
+    animation-name: float-c;
+    animation-duration: 4.6s;
+    animation-delay: -2.3s;
+}
+
+.lab-object--sticky {
+    animation-name: float-a;
+    animation-duration: 3.6s;
+    animation-delay: -0.7s;
+}
+
+.lab-object--mug {
+    animation-name: float-b;
+    animation-duration: 4.0s;
+    animation-delay: -1.8s;
+}
+
+.lab-object--terminal {
+    animation-name: float-c;
+    animation-duration: 4.4s;
+    animation-delay: -0.4s;
+}
+
+/* Pause animation on hover & show clickable cursor */
+.lab-object:hover {
+    animation-play-state: paused;
     cursor: pointer;
 }
 
-.progress-dot.active {
-    background: var(--primary-blue);
-    transform: scale(2.5);
+.lab-object:focus-visible {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 4px;
+    border-radius: 4px;
 }
 
-@media (max-width: 768px) {
-    .narrative-grid {
+/* Object body — the illustration wrapper */
+.lab-object__body {
+    position: relative;
+    transition: filter 0.3s var(--ease-smooth),
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 4px 12px rgba(15, 23, 42, 0.10)) drop-shadow(0 1px 3px rgba(15, 23, 42, 0.06));
+}
+
+.lab-object:hover .lab-object__body {
+    filter: drop-shadow(0 10px 28px rgba(15, 23, 42, 0.18)) drop-shadow(0 4px 10px rgba(15, 23, 42, 0.10));
+    transform: scale(1.04) translateY(-4px);
+}
+
+.lab-object--active .lab-object__body {
+    filter: drop-shadow(0 10px 30px rgba(59, 130, 246, 0.20)) drop-shadow(0 2px 8px rgba(15, 23, 42, 0.10));
+}
+
+/* SVG sizing */
+.lab-obj-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────── */
+.lab-object__tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 0.35rem 0.75rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s var(--ease-smooth);
+    z-index: 30;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.10);
+}
+
+/* Small "click" hint badge on tooltip */
+.lab-object__tooltip::after {
+    content: 'click';
+    display: inline-block;
+    margin-left: 6px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary-blue);
+    opacity: 0.75;
+    vertical-align: middle;
+}
+
+.lab-object:hover .lab-object__tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.lab-object__tooltip-name {
+    display: inline;
+    font-family: var(--font-stack);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-heading);
+    letter-spacing: 0.01em;
+}
+
+.lab-object__tooltip-hint {
+    display: block;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* ── Object positions & sizes (desktop) ──────────────────────── */
+.lab-object--laptop {
+    width: 280px;
+    left: 8%;
+    top: 12%;
+}
+
+.lab-object--notebook {
+    width: 160px;
+    left: 38%;
+    top: 8%;
+}
+
+.lab-object--server {
+    width: 155px;
+    right: 6%;
+    top: 8%;
+}
+
+.lab-object--sticky {
+    width: 185px;
+    left: 58%;
+    top: 45%;
+}
+
+.lab-object--mug {
+    width: 145px;
+    left: 28%;
+    bottom: 10%;
+}
+
+.lab-object--terminal {
+    width: 255px;
+    right: 14%;
+    bottom: 8%;
+}
+
+/* ── Panel ────────────────────────────────────────────────────── */
+.lab-panel {
+    width: 360px;
+    flex-shrink: 0;
+    height: 100%;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 15;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+}
+
+.lab-panel::-webkit-scrollbar {
+    width: 4px;
+}
+
+.lab-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.lab-panel::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 2px;
+}
+
+.lab-panel__inner {
+    padding: 2rem 1.8rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-height: 100%;
+}
+
+/* Panel header */
+.lab-panel__header {
+    margin-bottom: 0.5rem;
+}
+
+.lab-panel__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+}
+
+.lab-panel__tag {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: lowercase;
+}
+
+.lab-panel__close {
+    background: none;
+    border: 1px solid var(--border-light);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all 0.2s var(--ease-smooth);
+}
+
+.lab-panel__close:hover {
+    background: var(--text-heading);
+    border-color: var(--text-heading);
+    color: var(--bg-card);
+    transform: scale(1.08) rotate(90deg);
+}
+
+.lab-panel__accent-bar {
+    height: 2px;
+    width: 40px;
+    border-radius: 1px;
+    margin-bottom: 1.4rem;
+    transition: width 0.4s var(--ease-smooth);
+}
+
+.lab-panel:hover .lab-panel__accent-bar {
+    width: 64px;
+}
+
+/* Panel title */
+.lab-panel__title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--text-heading);
+    margin-bottom: 1rem;
+}
+
+/* Panel body */
+.lab-panel__body {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-body);
+    margin-bottom: 1.5rem;
+}
+
+.lab-panel__body em {
+    font-style: italic;
+    color: var(--text-heading);
+}
+
+/* Panel items */
+.lab-panel__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--border-light);
+    margin-bottom: 1.5rem;
+}
+
+.lab-panel__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.lab-panel__item-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.lab-panel__item-value {
+    font-family: var(--font-stack);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-heading);
+    line-height: 1.4;
+}
+
+/* Panel chips */
+.lab-panel__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
+.lab-panel__chip {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.28rem 0.65rem;
+    border: 1px solid var(--chip-color, var(--border-light));
+    color: var(--chip-color, var(--text-muted));
+    border-radius: 2px;
+    opacity: 0.8;
+    transition: all 0.2s var(--ease-smooth);
+}
+
+.lab-panel__chip:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--chip-color, var(--border-light)) 8%, transparent);
+}
+
+/* ── Footer strip ─────────────────────────────────────────────── */
+.lab-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 2.5rem;
+    border-top: 1px solid var(--border-light);
+    background: var(--bg-card);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+}
+
+.lab-footer__mono {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.lab-footer__pips {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lab-footer__pip {
+    width: 20px;
+    height: 3px;
+    background: var(--border-light);
+    border-radius: 1.5px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.lab-footer__pip--done {
+    background: var(--accent-primary);
+    opacity: 0.7;
+}
+
+.lab-footer__pip--active {
+    background: var(--primary-blue) !important;
+    width: 34px;
+    opacity: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE — Card Grid Layout
+   On small screens, replace the free-positioned desk with a
+   scrollable card grid so nothing overlaps.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 1200px — shrink objects slightly ─────────────────────────── */
+@media (max-width: 1200px) {
+    .lab-panel {
+        width: 320px;
+    }
+
+    .lab-object--laptop {
+        width: 240px;
+        left: 6%;
+        top: 14%;
+    }
+
+    .lab-object--notebook {
+        width: 140px;
+        left: 36%;
+        top: 10%;
+    }
+
+    .lab-object--server {
+        width: 135px;
+        right: 5%;
+        top: 10%;
+    }
+
+    .lab-object--sticky {
+        width: 160px;
+        left: 55%;
+        top: 46%;
+    }
+
+    .lab-object--mug {
+        width: 125px;
+        left: 24%;
+        bottom: 10%;
+    }
+
+    .lab-object--terminal {
+        width: 220px;
+        right: 12%;
+        bottom: 9%;
+    }
+}
+
+/* ── 900px — slide panel from bottom & keep objects visible ───── */
+@media (max-width: 900px) {
+    .lab-panel {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 55%;
+        border-left: none;
+        border-top: 1px solid var(--border-light);
+        border-radius: 16px 16px 0 0;
+    }
+
+    .lab-object--laptop {
+        width: 200px;
+        left: 4%;
+        top: 10%;
+    }
+
+    .lab-object--notebook {
+        width: 120px;
+        left: 38%;
+        top: 6%;
+    }
+
+    .lab-object--server {
+        width: 115px;
+        right: 4%;
+        top: 8%;
+    }
+
+    .lab-object--sticky {
+        width: 140px;
+        left: 52%;
+        top: 38%;
+    }
+
+    .lab-object--mug {
+        width: 105px;
+        left: 22%;
+        bottom: 46%;
+    }
+
+    .lab-object--terminal {
+        width: 190px;
+        right: 10%;
+        bottom: 44%;
+    }
+}
+
+/* ── 640px — full card-grid mobile layout ────────────────────── */
+@media (max-width: 640px) {
+
+    /* Make the section scroll instead of pin */
+    .about {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .lab-topbar {
+        padding: 0.6rem 1.2rem;
+    }
+
+    .lab-topbar__sub {
+        display: none;
+    }
+
+    .lab-footer {
+        padding: 0.6rem 1.2rem;
+    }
+
+    .lab-footer__mono {
+        font-size: 0.48rem;
+    }
+
+    /* Workspace becomes a vertical column */
+    .lab-workspace {
+        flex-direction: column;
+        overflow: visible;
+        height: auto;
+    }
+
+    .lab-desk {
+        overflow: visible;
+        height: auto;
+        flex: none;
+    }
+
+    .lab-desk__surface {
+        height: auto;
+        min-height: 0;
+        background: var(--bg-section);
+        padding: 1.5rem 1rem 1rem;
+    }
+
+    /* Replace absolute desk with CSS grid of cards */
+    .lab-desk__objects {
+        position: static;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        padding: 0;
+    }
+
+    /* Each object becomes a card */
+    .lab-object {
+        position: static;
+        width: 100% !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        transform: none;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 14px;
+        padding: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.65rem;
+        box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+        /* Float animation adapts to card mode — uses rotation-free version */
+        animation: float-card 3.8s ease-in-out infinite;
+        transition: box-shadow 0.3s var(--ease-smooth),
+            transform 0.3s var(--ease-smooth);
+    }
+
+    @keyframes float-card {
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    /* Pause & lift on hover to signal interactivity */
+    .lab-object:hover {
+        animation-play-state: paused;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+        transform: translateY(-4px) scale(1.03);
+    }
+
+    /* Active state ring */
+    .lab-object--active {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18),
+            0 8px 28px rgba(15, 23, 42, 0.12);
+    }
+
+    .lab-object__body {
+        width: 80px;
+        height: 80px;
+        transform: none;
+        filter: none;
+    }
+
+    .lab-object:hover .lab-object__body {
+        transform: none;
+        filter: drop-shadow(0 4px 12px rgba(15, 23, 42, 0.14));
+    }
+
+    /* Label shown statically below icon (tooltip hidden) */
+    .lab-object__tooltip {
+        position: static;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 1;
+        transform: none;
+        background: none;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        pointer-events: none;
+    }
+
+    /* Hide the "click" pseudo-element on mobile since it's always visible */
+    .lab-object__tooltip::after {
+        display: none;
+    }
+
+    .lab-object__tooltip-name {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-align: center;
+        color: var(--text-heading);
+    }
+
+    .lab-object__tooltip-hint {
+        font-size: 0.62rem;
+        text-align: center;
+        margin-top: 2px;
+    }
+
+    /* Panel slides up as a bottom sheet on mobile */
+    .lab-panel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 70%;
+        border-radius: 20px 20px 0 0;
+        border-top: 1px solid var(--border-light);
+        border-left: none;
+        z-index: 100;
+    }
+
+    .lab-panel__title {
+        font-size: 1.3rem;
+    }
+
+    .lab-panel__inner {
+        padding: 1.4rem 1.3rem 2.5rem;
+    }
+
+    /* Wood grain & edge shadow hidden on mobile */
+    .lab-desk__wood-grain,
+    .lab-desk__edge-shadow {
+        display: none;
+    }
+}
+
+/* ── 400px — single-column cards on very small screens ─────────── */
+@media (max-width: 400px) {
+    .lab-desk__objects {
         grid-template-columns: 1fr;
-        gap: 2rem;
     }
 
-    .act-title {
-        font-size: 3rem;
-    }
-
-    .story-progress {
-        right: 1.5rem;
-        gap: 1.5rem;
+    .lab-object__body {
+        width: 100px;
+        height: 100px;
     }
 }
