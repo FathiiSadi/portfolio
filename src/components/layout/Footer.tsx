@@ -39,6 +39,11 @@ const Footer: React.FC = () => {
                 </div>
 
                 <div className="foot-mark">
+                    <div className="foot-arrow">
+                        <Suspense fallback={<div style={{ height: '100%' }} />}>
+                            <BouncingDownArrow size="100%" />
+                        </Suspense>
+                    </div>
                     <div className="foot-word" aria-hidden="true">
                         <div className="foot-word__row">
                             <span className="foot-word__line">Fathi</span>
@@ -46,11 +51,6 @@ const Footer: React.FC = () => {
                         <div className="foot-word__row">
                             <span className="foot-word__line foot-word__line--em">Al-Sadi.</span>
                         </div>
-                    </div>
-                    <div className="foot-arrow">
-                        <Suspense fallback={<div style={{ height: '100%' }} />}>
-                            <BouncingDownArrow size="100%" />
-                        </Suspense>
                     </div>
                 </div>
 
