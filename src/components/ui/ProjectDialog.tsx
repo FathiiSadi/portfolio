@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { gsap } from 'gsap';
 import type { Project } from '../../types';
 import './ProjectDialog.css';
@@ -67,7 +68,7 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({ project, isOpen, onClose 
     };
     if (!isOpen || !project) return null;
 
-    return (
+    return createPortal(
         <div ref={dialogRef} className="project-dialog">
             <div className="dialog-overlay" onClick={handleClose}></div>
 
@@ -162,7 +163,8 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({ project, isOpen, onClose 
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 };
 

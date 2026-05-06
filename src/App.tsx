@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import LoadingScreen from './components/layout/LoadingScreen';
 import Navbar from './components/layout/Navbar';
 import ScrollProgress from './components/layout/ScrollProgress';
@@ -7,38 +7,42 @@ import CustomCursor from './components/layout/CustomCursor';
 import Footer from './components/layout/Footer';
 import './styles/index.css';
 
-// Lazy load section components for better code-splitting
 const Hero = lazy(() => import('./components/sections/Hero'));
 const About = lazy(() => import('./components/sections/About'));
 const Skills = lazy(() => import('./components/sections/Skills'));
-const InteractiveSkills = lazy(() => import('./components/sections/InteractiveSkills'));
 const Projects = lazy(() => import('./components/sections/Projects'));
 const CompetitiveProgramming = lazy(() => import('./components/sections/CompetitiveProgramming'));
 const Contact = lazy(() => import('./components/sections/Contact'));
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true); // Re-enabled with short duration
+  const [isLoading, setIsLoading] = useState(true);
+  const smoothRef = useRef<HTMLDivElement>(null);
 
-  const handleLoadComplete = () => {
-    setIsLoading(false);
-  };
+  const handleLoadComplete = useCallback(() => setIsLoading(false), []);
 
   useEffect(() => {
-    // Safety timeout: ensure loading screen is removed after max 3 seconds
-    const safetyTimeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-
-    // Prevent scroll during loading
-    if (isLoading) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-
+    const safety = setTimeout(() => setIsLoading(false), 6500);
+    if (isLoading) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
     return () => {
-      clearTimeout(safetyTimeout);
-      document.body.style.overflow = 'auto';
+      clearTimeout(safety);
+      document.body.style.overflow = '';
+    };
+  }, [isLoading]);
+
+  // Lerp smooth scroll, mounted once after the loader leaves
+  useEffect(() => {
+    if (isLoading) return;
+    let handle: { destroy: () => void } | null = null;
+    let cancelled = false;
+    (async () => {
+      const { initSmoothScroll } = await import('./utils/smoothScroll');
+      if (cancelled || !smoothRef.current) return;
+      handle = initSmoothScroll(smoothRef.current);
+    })();
+    return () => {
+      cancelled = true;
+      handle?.destroy();
     };
   }, [isLoading]);
 
@@ -51,18 +55,19 @@ function App() {
           <ScrollProgress />
           <Navbar />
           <BackToTop />
-          <main className="portfolio">
-            <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
-              <div id="hero"><Hero /></div>
-              <div id="about"><About /></div>
-              <div id="skills"><Skills /></div>
-              <InteractiveSkills />
-              <div id="projects"><Projects /></div>
-              <div id="competitive"><CompetitiveProgramming /></div>
-              <div id="contact"><Contact /></div>
-            </Suspense>
-            <Footer />
-          </main>
+          <div id="smooth-content" ref={smoothRef}>
+            <main className="portfolio">
+              <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+                <section id="hero"><Hero /></section>
+                <section id="about"><About /></section>
+                <section id="skills"><Skills /></section>
+                <section id="projects"><Projects /></section>
+                <section id="competitive"><CompetitiveProgramming /></section>
+                <section id="contact"><Contact /></section>
+              </Suspense>
+              <Footer />
+            </main>
+          </div>
         </>
       )}
     </>
