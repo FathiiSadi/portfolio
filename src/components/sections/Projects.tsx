@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { Project } from '../../types';
 import ProjectDialog from '../ui/ProjectDialog';
 import './Projects.css';
 
-// Import images to let Vite handle the base path
 import qalamLogo from '../../assets/images/projects/qalam-logo.jpeg';
 import qalamBg from '../../assets/images/projects/qalam-background.png';
 import fruitsLogo from '../../assets/images/projects/fruits-shops-logo.png';
@@ -29,7 +28,7 @@ const projectsData: Project[] = [
         links: {},
         images: [qalamBg],
         backgroundImage: qalamBg,
-        videoUrl: 'https://drive.google.com/file/d/1B2pfat2WSClWp6WAu8YBUPci4rJJTt-r/view?usp=sharing'
+        videoUrl: 'https://drive.google.com/file/d/1B2pfat2WSClWp6WAu8YBUPci4rJJTt-r/view?usp=sharing',
     },
     {
         id: 'amal',
@@ -42,7 +41,7 @@ const projectsData: Project[] = [
         links: {},
         images: [amalBg],
         backgroundImage: amalBg,
-        videoUrl: 'https://drive.google.com/file/d/16kV6_1w0VrZxXE-47TX371KJ0dilsHYN/view?usp=sharing'
+        videoUrl: 'https://drive.google.com/file/d/16kV6_1w0VrZxXE-47TX371KJ0dilsHYN/view?usp=sharing',
     },
     {
         id: 'frutia',
@@ -54,7 +53,7 @@ const projectsData: Project[] = [
         category: 'E-Commerce · Web Security · Payment Integration',
         links: {},
         images: [fruitsBg],
-        backgroundImage: fruitsBg
+        backgroundImage: fruitsBg,
     },
     {
         id: 'athar',
@@ -66,188 +65,156 @@ const projectsData: Project[] = [
         category: 'Content Platform · Backend Engineering',
         links: {},
         images: [atharBg],
-        backgroundImage: atharBg
-    }
+        backgroundImage: atharBg,
+    },
+];
+
+// Anti-grid placement: each project lives at a different alignment.
+const layout = [
+    { col: '1 / span 7', justify: 'flex-start' as const, year: '2025' },
+    { col: '6 / span 7', justify: 'flex-end' as const, year: '2025' },
+    { col: '2 / span 6', justify: 'flex-start' as const, year: '2024' },
+    { col: '7 / span 5', justify: 'flex-end' as const, year: '2023' },
 ];
 
 const Projects: React.FC = () => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const wrapperRef = useRef<HTMLDivElement>(null);
-    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const sectionRef = useRef<HTMLDivElement>(null);
+    const [selected, setSelected] = useState<Project | null>(null);
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
-        if (!containerRef.current || !wrapperRef.current) return;
-
-        const container = containerRef.current;
-        const totalProjects = projectsData.length;
-
-        const bgs = gsap.utils.toArray('.project-bg-container') as HTMLElement[];
-        const titles = gsap.utils.toArray('.project-fancy-title-wrapped') as HTMLElement[];
-        const individualCards = gsap.utils.toArray('.project-card-wrapper') as HTMLElement[];
-        const cardsTrack = (gsap.utils.toArray('.projects-cards-track') as HTMLElement[])[0];
-
+        if (!sectionRef.current) return;
         const ctx = gsap.context(() => {
-            const masterTl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: container,
-                    start: 'top top',
-                    end: `+=${totalProjects * 200}%`, // Slower scroll (user might have changed it to 100%, I'll stick to 200% for smooth feel as requested)
-                    pin: true,
-                    scrub: 1.5,
-                    anticipatePin: 1,
-                    snap: {
-                        snapTo: 1 / (totalProjects - 1),
-                        duration: { min: 0.2, max: 0.5 },
-                        delay: 0,
-                        ease: "power1.inOut"
-                    }
+            gsap.utils.toArray<HTMLElement>('.proj').forEach((card, i) => {
+                gsap.from(card, {
+                    opacity: 0,
+                    y: 60,
+                    duration: 1.0,
+                    delay: (i % 2) * 0.05,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 88%',
+                    },
+                });
+
+                const img = card.querySelector('.proj__media img');
+                if (img) {
+                    gsap.fromTo(img,
+                        { yPercent: -10, scale: 1.15 },
+                        {
+                            yPercent: 10,
+                            scale: 1.15,
+                            ease: 'none',
+                            scrollTrigger: {
+                                trigger: card,
+                                start: 'top bottom',
+                                end: 'bottom top',
+                                scrub: true,
+                            },
+                        });
                 }
             });
-
-            // Set initial states
-            gsap.set(bgs.slice(1), { opacity: 0, scale: 1.1 });
-            gsap.set(titles.slice(1), { opacity: 0, scale: 0.8 });
-
-            // Create a sequence that allows "dwell" time at each project
-            projectsData.forEach((_, i) => {
-                const stepTl = gsap.timeline();
-
-                // 1. Dwell Phase (with Card Drift)
-                // Even when "pinned", we move the card slightly to give it life
-                stepTl.to(individualCards[i], {
-                    x: -50, // Drift left slightly
-                    duration: 1.5,
-                    ease: "none"
-                }, 0);
-
-                if (i < totalProjects - 1) {
-                    // 2. Transition Phase
-                    const transitionTl = gsap.timeline();
-
-                    // Main track shift
-                    transitionTl.to(cardsTrack, {
-                        xPercent: -100 * (i + 1),
-                        duration: 1,
-                        ease: "power2.inOut"
-                    }, 0);
-
-                    // Drift for entering card
-                    transitionTl.fromTo(individualCards[i + 1],
-                        { x: 100 },
-                        { x: 50, duration: 0.3, ease: "power2.inOut" },
-                        0
-                    );
-
-                    // Fade backgrounds
-                    transitionTl.to(bgs[i], {
-                        opacity: 0,
-                        scale: 1.2,
-                        duration: 0.6,
-                        ease: "power2.inOut"
-                    }, 0);
-                    transitionTl.to(bgs[i + 1], {
-                        opacity: 1,
-                        scale: 1,
-                        duration: 0.6,
-                        ease: "power2.inOut"
-                    }, 0);
-
-                    // Fade/Move titles
-                    transitionTl.to(titles[i], {
-                        opacity: 0,
-                        scale: 1.2,
-                        y: -80,
-                        duration: 0.5,
-                        ease: "power2.inOut"
-                    }, 0);
-                    transitionTl.fromTo(titles[i + 1],
-                        { opacity: 0, scale: 0.7, y: 80 },
-                        { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.2)" },
-                        0.2
-                    );
-
-                    stepTl.add(transitionTl);
-                } else {
-                    // Last project drift
-                    stepTl.to(individualCards[i], { x: -50, duration: 0.6 });
-                }
-
-                masterTl.add(stepTl);
-            });
-
-        }, container);
-
+        }, sectionRef);
         return () => ctx.revert();
     }, []);
 
-    const handleProjectClick = (project: Project) => {
-        setSelectedProject(project);
-        setIsDialogOpen(true);
+    const handleOpen = (p: Project) => {
+        setSelected(p);
+        setOpen(true);
     };
-
-    const handleCloseDialog = () => {
-        setIsDialogOpen(false);
-        setTimeout(() => setSelectedProject(null), 300);
+    const handleClose = () => {
+        setOpen(false);
+        setTimeout(() => setSelected(null), 300);
     };
 
     return (
-        <section ref={containerRef} className="projects-section">
-            <div ref={wrapperRef} className="projects-pinned-wrapper">
+        <div ref={sectionRef} className="projects-section">
+            <div className="shell">
+                <header className="chapter">
+                    <span className="chapter__index">04 / Selected work</span>
+                    <span className="chapter__title">Recent obsessions</span>
+                    <span className="chapter__rule" />
+                </header>
 
-                {/* 1. Background Layer (Fixed) */}
-                <div className="projects-bg-stacked">
-                    {projectsData.map((project) => (
-                        <div
-                            key={`bg-${project.id}`}
-                            className="project-bg-container"
-                            style={{ backgroundImage: `url('${project.backgroundImage || ''}')` }}
+                <div className="projects-head">
+                    <h2 className="projects-title">
+                        <span>Selected</span>
+                        <em className="projects-title__em">work</em>
+                        <span className="projects-title__small">— vol. 01</span>
+                    </h2>
+                    <p className="projects-sub">
+                        Four shipped systems. Each one solved a real problem under real
+                        constraints. Click any title to open the case study.
+                    </p>
+                </div>
+
+                <div className="projects-grid">
+                    {projectsData.map((p, i) => (
+                        <article
+                            key={p.id}
+                            className={`proj proj--${i % 2 === 0 ? 'l' : 'r'}`}
+                            style={{
+                                gridColumn: layout[i % layout.length].col,
+                                justifySelf: layout[i % layout.length].justify === 'flex-end' ? 'end' : 'start',
+                            }}
                         >
-                            <div className="bg-overlay"></div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* 2. Title Layer (Fixed) */}
-                <div className="projects-titles-stacked">
-                    {projectsData.map((project) => (
-                        <div key={`title-${project.id}`} className="project-fancy-title-wrapped">
-                            <h2 className="project-fancy-title">{project.title}</h2>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="projects-vignette"></div>
-
-                {/* 3. Card Layer (Sliding) */}
-                <div className="projects-cards-container">
-                    <div className="projects-cards-track">
-                        {projectsData.map((project) => (
-                            <div key={`slide-${project.id}`} className="project-slide">
-                                <div className="project-card-wrapper" onClick={() => handleProjectClick(project)}>
-                                    <div className="project-card-full">
-                                        <div className="card-media-full">
-                                            <img
-                                                src={project.logo || project.backgroundImage || ''}
-                                                alt={project.title}
-                                                className="full-image"
-                                            />
-                                            <div className="card-minimal-overlay"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div className="proj__meta">
+                                <span className="proj__index">— 0{i + 1}</span>
+                                <span className="proj__year">{layout[i % layout.length].year}</span>
                             </div>
-                        ))}
-                    </div>
+
+                            <button
+                                className="proj__media"
+                                onClick={() => handleOpen(p)}
+                                data-cursor="view"
+                                data-cursor-label="Open case"
+                                aria-label={`Open ${p.title}`}
+                            >
+                                <img
+                                    src={p.backgroundImage || p.logo || ''}
+                                    alt={p.title}
+                                    loading="lazy"
+                                />
+                                <span className="proj__media-frame" />
+                                <span className="proj__media-tag">{p.title}</span>
+                            </button>
+
+                            <div className="proj__body">
+                                <h3 className="proj__title">{p.title}</h3>
+                                <p className="proj__desc">{p.description}</p>
+                                <div className="proj__tags">
+                                    {p.technologies.slice(0, 5).map((t) => (
+                                        <span key={t}>{t}</span>
+                                    ))}
+                                </div>
+                                <button
+                                    className="proj__open"
+                                    onClick={() => handleOpen(p)}
+                                    data-magnetic
+                                    data-magnetic-strength="0.3"
+                                >
+                                    <span>Read case study</span>
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                        <path d="M3 11L11 3M11 3H4.5M11 3V9.5"
+                                            stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+
+                <div className="projects-end">
+                    <span>That's a sample.</span>
+                    <a href="#contact" className="projects-end__link" data-magnetic>
+                        Talk to me about the rest →
+                    </a>
                 </div>
             </div>
 
-            <ProjectDialog
-                project={selectedProject}
-                isOpen={isDialogOpen}
-                onClose={handleCloseDialog}
-            />
-        </section>
+            <ProjectDialog project={selected} isOpen={open} onClose={handleClose} />
+        </div>
     );
 };
 

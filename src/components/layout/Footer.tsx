@@ -33,7 +33,7 @@ const Footer: React.FC = () => {
                             <li>Type: Instrument Serif · Geist · JetBrains Mono</li>
                             <li>Built: Vite · React · Three.js · GSAP</li>
                             <li>Location: AMM, GMT+3</li>
-                            <li>© {new Date().getFullYear()} F.AS</li>
+                            <li>© {new Date().getFullYear()} Fathi Al.</li>
                         </ul>
                     </div>
                 </div>

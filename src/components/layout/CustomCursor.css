@@ -1,34 +1,98 @@
-.custom-cursor {
+.cur {
     position: fixed;
     top: 0;
     left: 0;
-    width: 20px;
-    height: 20px;
-    border: 1px solid var(--primary-blue);
-    border-radius: 50%;
     pointer-events: none;
     z-index: var(--z-cursor);
-    transform: translate(-50%, -50%);
-    transition: width 0.3s, height 0.3s, background-color 0.3s;
+    will-change: transform, opacity, width, height, background;
     mix-blend-mode: difference;
 }
 
-.custom-cursor-dot {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 4px;
-    background-color: var(--primary-blue);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: var(--z-cursor);
-    transform: translate(-50%, -50%);
+.cur--dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--ink-100);
+    transition: width 0.3s var(--ease-out-expo), height 0.3s var(--ease-out-expo), background 0.3s var(--ease-out-expo), opacity 0.3s var(--ease-out-expo);
 }
 
-.custom-cursor.hovered {
-    width: 50px;
-    height: 50px;
-    background-color: rgba(59, 130, 246, 0.1);
-    border-color: var(--secondary-purple);
+.cur--ring {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    transition: width 0.45s var(--ease-out-expo),
+        height 0.45s var(--ease-out-expo),
+        border-color 0.45s var(--ease-out-expo),
+        background 0.45s var(--ease-out-expo),
+        opacity 0.3s var(--ease-out-expo);
+}
+
+.cur--ring.cur--hover {
+    width: 64px;
+    height: 64px;
+    border-color: var(--acid);
+    background: rgba(215, 255, 58, 0.12);
+}
+
+.cur--ring.cur--view {
+    width: 92px;
+    height: 92px;
+    border-color: transparent;
+    background: var(--acid);
+    mix-blend-mode: normal;
+}
+
+.cur--ring.cur--drag {
+    width: 76px;
+    height: 76px;
+    border-color: var(--acid);
+    background: transparent;
+}
+
+.cur--dot.cur--hover {
+    width: 4px;
+    height: 4px;
+    background: var(--acid);
+}
+
+.cur--dot.cur--view {
+    opacity: 0;
+}
+
+.cur--label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-900);
+    background: transparent;
+    padding: 4px 0;
+    margin-top: 0;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-out-expo);
+    transform: translate(-50%, -50%);
+    mix-blend-mode: normal;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.cur--label.cur--label-on {
+    opacity: 1;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .cur {
+        display: none !important;
+    }
+}
+
+/* Cross-origin iframes (e.g. video embeds) capture the pointer and the
+   custom cursor can't track inside them. Show the system cursor as a
+   fallback so the user is never staring at an empty pointer area. */
+iframe,
+.video-container,
+.project-video,
+video {
+    cursor: auto !important;
 }

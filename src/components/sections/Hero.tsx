@@ -1,157 +1,468 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 import { gsap } from 'gsap';
-import EnergyRibbons from '../effects/EnergyRibbons';
 import './Hero.css';
 
-const Hero: React.FC = () => {
-    const heroRef = useRef<HTMLDivElement>(null);
-    const titleRef = useRef<HTMLHeadingElement>(null);
-    const subtitleRef = useRef<HTMLParagraphElement>(null);
-    const bracketsRef = useRef<HTMLDivElement>(null);
-    const socialRef = useRef<HTMLDivElement>(null);
+/* ──────────────────────────────────────────────────────────────────────────
+   Software-engineering themed 3D scene.
+   A central wireframe core + orbital satellite nodes connected by edges
+   (a "system architecture" graph), plus floating code-symbol glyphs.
+   Tracks the mouse for a parallax tilt.
+   ────────────────────────────────────────────────────────────────────────── */
 
-    // Individual path refs for morphing
-    const pathLeftRef = useRef<SVGPathElement>(null);
-    const pathRightRef = useRef<SVGPathElement>(null);
-    const pathSlashRef = useRef<SVGPathElement>(null);
+const ACID = '#D7FF3A';
+const PLASMA = '#6BD3FF';
+
+type MouseRef = React.MutableRefObject<{ x: number; y: number; hover: number }>;
+
+/* Fibonacci-sphere distribution for evenly placed satellite nodes. */
+function fibonacciSphere(n: number, radius: number) {
+    const out: THREE.Vector3[] = [];
+    const phi = Math.PI * (3 - Math.sqrt(5));
+    for (let i = 0; i < n; i++) {
+        const y = 1 - (i / (n - 1)) * 2;
+        const r = Math.sqrt(1 - y * y);
+        const theta = phi * i;
+        out.push(new THREE.Vector3(Math.cos(theta) * r, y, Math.sin(theta) * r).multiplyScalar(radius));
+    }
+    return out;
+}
+
+const Core: React.FC = () => {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const lineRef = useRef<THREE.LineSegments>(null);
+
+    useFrame((_, dt) => {
+        if (meshRef.current) {
+            meshRef.current.rotation.y += dt * 0.18;
+            meshRef.current.rotation.x += dt * 0.06;
+            const s = 1 + Math.sin(performance.now() * 0.0014) * 0.04;
+            meshRef.current.scale.setScalar(s);
+        }
+        if (lineRef.current && meshRef.current) {
+            lineRef.current.rotation.copy(meshRef.current.rotation);
+            lineRef.current.scale.copy(meshRef.current.scale);
+        }
+    });
+
+    return (
+        <group>
+            <mesh ref={meshRef}>
+                <icosahedronGeometry args={[0.85, 1]} />
+                <meshBasicMaterial color="#0B0B10" />
+            </mesh>
+            <lineSegments ref={lineRef}>
+                <wireframeGeometry args={[new THREE.IcosahedronGeometry(0.86, 1)]} />
+                <lineBasicMaterial color={ACID} transparent opacity={0.7} />
+            </lineSegments>
+            {/* Inner spinning octahedron suggests a "kernel" inside the core. */}
+            <InnerKernel />
+        </group>
+    );
+};
+
+const InnerKernel: React.FC = () => {
+    const ref = useRef<THREE.LineSegments>(null);
+    useFrame((_, dt) => {
+        if (ref.current) {
+            ref.current.rotation.x -= dt * 0.5;
+            ref.current.rotation.z += dt * 0.35;
+        }
+    });
+    return (
+        <lineSegments ref={ref}>
+            <wireframeGeometry args={[new THREE.OctahedronGeometry(0.42, 0)]} />
+            <lineBasicMaterial color={PLASMA} transparent opacity={0.55} />
+        </lineSegments>
+    );
+};
+
+const SatelliteNode: React.FC<{ position: THREE.Vector3; index: number }> = ({ position, index }) => {
+    const groupRef = useRef<THREE.Group>(null);
+    useFrame((_, dt) => {
+        if (groupRef.current) {
+            groupRef.current.rotation.x += dt * (0.4 + (index % 3) * 0.15);
+            groupRef.current.rotation.y += dt * (0.3 + (index % 4) * 0.1);
+        }
+    });
+    const isAcid = index % 3 === 0;
+    return (
+        <group position={position}>
+            <group ref={groupRef}>
+                <mesh>
+                    <boxGeometry args={[0.16, 0.16, 0.16]} />
+                    <meshBasicMaterial color="#0B0B10" />
+                </mesh>
+                <lineSegments>
+                    <wireframeGeometry args={[new THREE.BoxGeometry(0.17, 0.17, 0.17)]} />
+                    <lineBasicMaterial
+                        color={isAcid ? ACID : '#E8E8EE'}
+                        transparent
+                        opacity={isAcid ? 0.9 : 0.45}
+                    />
+                </lineSegments>
+            </group>
+            {/* Halo glow point */}
+            <points>
+                <bufferGeometry>
+                    <bufferAttribute
+                        attach="attributes-position"
+                        args={[new Float32Array([0, 0, 0]), 3]}
+                        count={1}
+                    />
+                </bufferGeometry>
+                <pointsMaterial
+                    size={0.18}
+                    color={isAcid ? ACID : PLASMA}
+                    transparent
+                    opacity={0.6}
+                    sizeAttenuation
+                    blending={THREE.AdditiveBlending}
+                    depthWrite={false}
+                />
+            </points>
+        </group>
+    );
+};
+
+/* Lines from the core out to every satellite + a few node-to-node edges. */
+const Connections: React.FC<{ nodes: THREE.Vector3[] }> = ({ nodes }) => {
+    const geom = useMemo(() => {
+        const positions: number[] = [];
+        // Hub-spoke: core (origin) to each node
+        nodes.forEach(n => {
+            positions.push(0, 0, 0, n.x, n.y, n.z);
+        });
+        // A few node-to-node edges (deterministic, sparse)
+        const pairs: Array<[number, number]> = [];
+        for (let i = 0; i < nodes.length; i++) {
+            const j = (i + 3) % nodes.length;
+            const k = (i + 5) % nodes.length;
+            if (i < j) pairs.push([i, j]);
+            if (i < k) pairs.push([i, k]);
+        }
+        pairs.forEach(([a, b]) => {
+            const na = nodes[a];
+            const nb = nodes[b];
+            positions.push(na.x, na.y, na.z, nb.x, nb.y, nb.z);
+        });
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        return g;
+    }, [nodes]);
+
+    return (
+        <lineSegments geometry={geom}>
+            <lineBasicMaterial color={ACID} transparent opacity={0.18} />
+        </lineSegments>
+    );
+};
+
+/* Build a CanvasTexture with a code symbol drawn on it. Avoids async font
+   loading (drei <Text> would suspend the canvas and blank the scene). */
+function makeGlyphTexture(char: string, color: string): THREE.CanvasTexture {
+    const size = 256;
+    const c = document.createElement('canvas');
+    c.width = size;
+    c.height = size;
+    const ctx = c.getContext('2d');
+    if (ctx) {
+        ctx.clearRect(0, 0, size, size);
+        ctx.fillStyle = color;
+        // Auto-fit: shorter strings get a bigger font
+        const fontPx = char.length === 1 ? 200 : char.length === 2 ? 140 : 110;
+        ctx.font = `600 ${fontPx}px ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 16;
+        ctx.fillText(char, size / 2, size / 2);
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    tex.needsUpdate = true;
+    return tex;
+}
+
+/* Sprite-based glyph — always faces the camera, renders instantly, no async. */
+const Glyph: React.FC<{
+    texture: THREE.CanvasTexture;
+    position: [number, number, number];
+    scale: number;
+    bobSpeed: number;
+}> = ({ texture, position, scale, bobSpeed }) => {
+    const ref = useRef<THREE.Sprite>(null);
+    const start = useMemo(() => Math.random() * Math.PI * 2, []);
+    useFrame((state) => {
+        if (!ref.current) return;
+        const t = state.clock.elapsedTime;
+        ref.current.position.y = position[1] + Math.sin(t * bobSpeed + start) * 0.14;
+        ref.current.position.x = position[0] + Math.cos(t * bobSpeed * 0.7 + start) * 0.06;
+    });
+    return (
+        <sprite ref={ref} position={position} scale={[scale, scale, scale]}>
+            <spriteMaterial
+                map={texture}
+                transparent
+                depthWrite={false}
+                blending={THREE.AdditiveBlending}
+            />
+        </sprite>
+    );
+};
+
+const Glyphs: React.FC = () => {
+    const items = useMemo(() => {
+        const defs = [
+            { char: '{', pos: [-2.4, 1.0, -0.2], color: ACID, scale: 0.7, bob: 0.6 },
+            { char: '}', pos: [2.4, -0.9, 0.4], color: ACID, scale: 0.7, bob: 0.55 },
+            { char: '</>', pos: [0.0, 1.8, -0.6], color: '#FFFFFF', scale: 0.7, bob: 0.5 },
+            { char: ';', pos: [-1.7, -1.4, 0.8], color: PLASMA, scale: 0.55, bob: 0.7 },
+            { char: '()', pos: [1.9, 1.3, -0.8], color: '#C8C8D2', scale: 0.55, bob: 0.45 },
+            { char: '=>', pos: [-2.1, 0.1, 1.0], color: ACID, scale: 0.55, bob: 0.6 },
+            { char: '01', pos: [2.1, 0.2, 1.1], color: '#C8C8D2', scale: 0.5, bob: 0.65 },
+            { char: '#', pos: [0.6, -1.9, -0.4], color: PLASMA, scale: 0.55, bob: 0.55 },
+        ];
+        return defs.map(d => ({
+            ...d,
+            texture: makeGlyphTexture(d.char, d.color),
+        }));
+    }, []);
+
+    useEffect(() => () => {
+        items.forEach(it => it.texture.dispose());
+    }, [items]);
+
+    return (
+        <>
+            {items.map((it, i) => (
+                <Glyph
+                    key={i}
+                    texture={it.texture}
+                    position={it.pos as [number, number, number]}
+                    scale={it.scale}
+                    bobSpeed={it.bob}
+                />
+            ))}
+        </>
+    );
+};
+
+/* Subtle starfield of small particles in a spherical shell. */
+const ParticleField: React.FC = () => {
+    const ref = useRef<THREE.Points>(null);
+    const { positions, count } = useMemo(() => {
+        const N = 320;
+        const arr = new Float32Array(N * 3);
+        for (let i = 0; i < N; i++) {
+            const r = 2.6 + Math.random() * 2.0;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+            arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+            arr[i * 3 + 2] = r * Math.cos(phi);
+        }
+        return { positions: arr, count: N };
+    }, []);
+
+    useFrame((_, dt) => {
+        if (ref.current) {
+            ref.current.rotation.y += dt * 0.03;
+            ref.current.rotation.x += dt * 0.012;
+        }
+    });
+
+    return (
+        <points ref={ref}>
+            <bufferGeometry>
+                <bufferAttribute attach="attributes-position" args={[positions, 3]} count={count} />
+            </bufferGeometry>
+            <pointsMaterial
+                size={0.012}
+                color={ACID}
+                transparent
+                opacity={0.5}
+                sizeAttenuation
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+            />
+        </points>
+    );
+};
+
+/* The whole scene rotates softly with the mouse for parallax. */
+const Scene: React.FC<{ mouseRef: MouseRef }> = ({ mouseRef }) => {
+    const groupRef = useRef<THREE.Group>(null);
+    const nodes = useMemo(() => fibonacciSphere(10, 1.8), []);
+
+    useFrame((_, dt) => {
+        if (!groupRef.current) return;
+        const targetX = mouseRef.current.y * 0.35;
+        const targetY = mouseRef.current.x * 0.55;
+        groupRef.current.rotation.x += (targetX - groupRef.current.rotation.x) * 0.04;
+        groupRef.current.rotation.y += (targetY - groupRef.current.rotation.y) * 0.04;
+        // Constant slow orbital drift
+        groupRef.current.rotation.y += dt * 0.05;
+    });
+
+    return (
+        <group ref={groupRef}>
+            <Core />
+            <Connections nodes={nodes} />
+            {nodes.map((n, i) => (
+                <SatelliteNode key={i} position={n} index={i} />
+            ))}
+            <Glyphs />
+            <ParticleField />
+            <ambientLight intensity={0.6} />
+            <pointLight position={[3, 4, 5]} intensity={0.8} color={ACID} />
+            <pointLight position={[-4, -3, 2]} intensity={0.4} color={PLASMA} />
+        </group>
+    );
+};
+
+const Hero: React.FC = () => {
+    const sectionRef = useRef<HTMLDivElement>(null);
+    const titleRef = useRef<HTMLHeadingElement>(null);
+    const eyebrowRef = useRef<HTMLDivElement>(null);
+    const subRef = useRef<HTMLParagraphElement>(null);
+    const ctaRef = useRef<HTMLDivElement>(null);
+    const sideRef = useRef<HTMLDivElement>(null);
+
+    const mouse = useRef({ x: 0, y: 0, hover: 0 });
 
     useEffect(() => {
-        const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+        const onMove = (e: MouseEvent) => {
+            mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.current.y = -((e.clientY / window.innerHeight) * 2 - 1);
+        };
+        const onEnter = () => (mouse.current.hover = 1);
+        const onLeave = () => (mouse.current.hover = 0);
 
-        // Initial set for typography
-        if (titleRef.current) gsap.set(titleRef.current.children, { y: 100, opacity: 0 });
-        if (subtitleRef.current) gsap.set(subtitleRef.current, { y: 20, opacity: 0 });
-        if (socialRef.current) gsap.set(socialRef.current.children, { y: -20, opacity: 0 });
+        window.addEventListener('mousemove', onMove);
+        sectionRef.current?.addEventListener('mouseenter', onEnter);
+        sectionRef.current?.addEventListener('mouseleave', onLeave);
+        return () => {
+            window.removeEventListener('mousemove', onMove);
+            sectionRef.current?.removeEventListener('mouseenter', onEnter);
+            sectionRef.current?.removeEventListener('mouseleave', onLeave);
+        };
+    }, []);
 
-        // Initial set for paths
-        gsap.set([pathLeftRef.current, pathRightRef.current, pathSlashRef.current], {
-            opacity: 0,
-            scale: 0.8,
-            transformOrigin: 'center'
-        });
-
-        // Animation Sequence
-        tl.add('start');
-
-        if (titleRef.current) {
-            tl.to(titleRef.current.children, {
-                y: 0,
-                opacity: 1,
-                duration: 1.2,
-                stagger: 0.15,
-            }, 'start');
-        }
-
-        // Morphing animation for brackets - Infinite Loop
-        if (pathLeftRef.current && pathRightRef.current && pathSlashRef.current) {
-            const bracketTl = gsap.timeline({
-                repeat: -1,
-                repeatDelay: 1,
-                defaults: { duration: 1.5, ease: "elastic.out(1, 0.75)" }
-            });
-
-            bracketTl
-                // Phase 1: Morph Out (Expand)
-                .to(pathLeftRef.current, {
-                    attr: { d: "M60 40 L30 100 L60 160" },
-                    opacity: 1
-                }, 0)
-                .to(pathRightRef.current, {
-                    attr: { d: "M140 40 L170 100 L140 160" },
-                    opacity: 1
-                }, 0.15)
-                .to(pathSlashRef.current, {
-                    attr: { d: "M95 180 L125 20" },
-                    opacity: 0.6,
-                    ease: "power4.out"
-                }, 0.4)
-
-                // Phase 2: Morph In (Collapse)
-                .to(pathLeftRef.current, {
-                    attr: { d: "M100 100 L100 100 L100 100" },
-                    opacity: 0,
-                    duration: 1,
-                    ease: "power3.inOut"
-                }, "+=2") // Stay expanded for 2 seconds
-                .to(pathRightRef.current, {
-                    attr: { d: "M100 100 L100 100 L100 100" },
-                    opacity: 0,
-                    duration: 1,
-                    ease: "power3.inOut"
-                }, "<0.1")
-                .to(pathSlashRef.current, {
-                    attr: { d: "M100 100 L100 100" },
-                    opacity: 0,
-                    duration: 1,
-                    ease: "power3.inOut"
-                }, "<0.15");
-
-            // Ambient floating remains active as well
-            gsap.to(bracketsRef.current, {
-                y: -15,
-                duration: 1.5,
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut'
-            });
-        }
-
-        if (subtitleRef.current) {
-            tl.to(subtitleRef.current, {
-                y: 0,
-                opacity: 1,
-                duration: 0.8,
-            }, 'start+=0.8');
-        }
-
-        if (socialRef.current) {
-            tl.to(socialRef.current.children, {
-                y: 0,
-                opacity: 1,
-                duration: 0.5,
-                stagger: 0.1,
-            }, 'start+=1.2');
-        }
-
+    useEffect(() => {
+        if (!titleRef.current) return;
+        const lines = titleRef.current.querySelectorAll('.hero-line__inner');
+        const tl = gsap.timeline({ delay: 0.1 });
+        gsap.set(lines, { yPercent: 110 });
+        tl.from(eyebrowRef.current, { opacity: 0, y: 12, duration: 0.7, ease: 'power3.out' });
+        tl.to(lines, {
+            yPercent: 0,
+            duration: 1.05,
+            stagger: 0.1,
+            ease: 'expo.out',
+        }, '-=0.4');
+        tl.from(subRef.current, { opacity: 0, y: 18, duration: 0.7, ease: 'power3.out' }, '-=0.6');
+        tl.from(ctaRef.current?.children || [], {
+            opacity: 0, y: 12, duration: 0.5, stagger: 0.06, ease: 'power3.out',
+        }, '-=0.5');
+        tl.from(sideRef.current?.children || [], {
+            opacity: 0, x: 24, duration: 0.6, stagger: 0.06, ease: 'power3.out',
+        }, '-=0.4');
     }, []);
 
     return (
-        <section ref={heroRef} className="hero section">
-            <EnergyRibbons />
-            {/* Social Links - Top Right Absolute */}
-            <div ref={socialRef} className="hero-socials">
-                <a href="https://www.linkedin.com/in/fathi-sadi/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                </a>
-                <a href="https://github.com/FathiiSadi" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                </a>
-                <a href="mailto:fathii.alsadi@gmail.com" aria-label="Email">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                </a>
+        <div ref={sectionRef} className="hero">
+            <div className="hero__canvas" aria-hidden="true">
+                <Canvas
+                    camera={{ position: [0, 0, 5.4], fov: 38 }}
+                    dpr={[1, 1.6]}
+                    gl={{ antialias: true, alpha: true }}
+                >
+                    <Scene mouseRef={mouse} />
+                </Canvas>
+                <div className="hero__canvas-glow" />
             </div>
 
-            <div className="container hero-container">
-                <div className="hero-text-wrapper">
-                    <h1 ref={titleRef} className="hero-title">
-                        <span className="block text-outline-blue">SOFTWARE</span>
-                        <span className="block text-filled-blue">DEVELOPMENT</span>
-                        <span className="block text-outline-blue">ENGINEER</span>
-                    </h1>
-                    <p ref={subtitleRef} className="hero-subtitle">
-                        I implement high-performance applications  with <br /> clean architecture and strong problem-solving foundations.
+            <div className="hero__rails">
+                <span /><span /><span /><span /><span />
+            </div>
+
+            <div className="hero__shell shell">
+                <div ref={eyebrowRef} className="hero__eyebrow">
+                    <span className="hero__eyebrow-dot" />
+                    <span>Fathi Al-Sadi · 2026 — Software engineering</span>
+                    <span className="hero__eyebrow-loc">Amman, Jordan 31°57'N · 35°56'E</span>
+                </div>
+
+                <h1 ref={titleRef} className="hero__title">
+                    <span className="hero-line">
+                        <span className="hero-line__inner">Engineering <em className="hero__em">in&nbsp;quiet</em></span>
+                    </span>
+                    <span className="hero-line">
+                        <span className="hero-line__inner">systems that <span className="hero__acid">outlast</span></span>
+                    </span>
+                    <span className="hero-line">
+                        <span className="hero-line__inner"><em className="hero__em">the</em> trends.</span>
+                    </span>
+                </h1>
+
+                <div className="hero__lower">
+                    <p ref={subRef} className="hero__sub">
+                        I'm <strong>Fathi Al-Sadi</strong> — a software engineer building
+                        production-grade backends, full-stack applications and the
+                        glue that holds them together. Currently shipping for healthcare
+                        out of <em>Amman</em>.
                     </p>
+
+                    <div ref={ctaRef} className="hero__cta">
+                        <a
+                            href="#projects"
+                            className="btn-pill"
+                            data-magnetic
+                            data-magnetic-strength="0.3"
+                            data-cursor-label="See work"
+                        >
+                            <span className="btn-pill__dot" />
+                            See selected work
+                        </a>
+                        <a
+                            href="#contact"
+                            className="hero__ghost"
+                            data-magnetic
+                            data-magnetic-strength="0.3"
+                        >
+                            <span>Start a project</span>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <path d="M3 11L11 3M11 3H4.5M11 3V9.5" stroke="currentColor" strokeWidth="1.4"
+                                    strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
 
-                <div ref={bracketsRef} className="hero-brackets">
-                    <svg width="400" height="400" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path ref={pathLeftRef} d="M60 40 L30 100 L60 160" stroke="var(--accent-primary)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-                        <path ref={pathRightRef} d="M140 40 L170 100 L140 160" stroke="var(--accent-primary)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-                        <path ref={pathSlashRef} d="M95 180 L125 20" stroke="var(--primary-blue)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
-                    </svg>
+                <div ref={sideRef} className="hero__sidecard">
+                    <div className="hero__sidecard-row">
+                        <span className="hero__sidecard-key">Now</span>
+                        <span className="hero__sidecard-val">Engineer · Altibbi</span>
+                    </div>
+                    <div className="hero__sidecard-row">
+                        <span className="hero__sidecard-key">Stack</span>
+                        <span className="hero__sidecard-val">Laravel · Vue · Postgres</span>
+                    </div>
+                    <div className="hero__sidecard-row">
+                        <span className="hero__sidecard-key">Sport</span>
+                        <span className="hero__sidecard-val">Codeforces · 31 contests</span>
+                    </div>
                 </div>
+
+                <a href="#about" className="hero__scroll" aria-label="Scroll to next section">
+                    <span className="hero__scroll-text">scroll</span>
+                    <span className="hero__scroll-line" />
+                </a>
             </div>
-        </section>
+        </div>
     );
 };
 

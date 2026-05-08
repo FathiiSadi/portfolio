@@ -1,253 +1,191 @@
-
-import { useState, useEffect, useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { Trophy, TrendingUp, Code, Activity } from "lucide-react";
-import { fetchCodeforcesStats, type CodeforcesStats } from "../../utils/codeforces";
-import "./CompetitiveProgramming.css";
+import { useState, useEffect, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
+import { fetchCodeforcesStats, type CodeforcesStats } from '../../utils/codeforces';
+import './CompetitiveProgramming.css';
 
 const AnimatedNumber = ({ value, isInView, delay }: { value: number | string; isInView: boolean; delay?: number }) => {
-    const [displayValue, setDisplayValue] = useState(0);
-    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    const [display, setDisplay] = useState(0);
+    const num = typeof value === 'string' ? parseFloat(value) : value;
 
     useEffect(() => {
         if (!isInView) return;
-
         let start = 0;
-        const end = numericValue;
-        const duration = 2000;
-        // avoid division by zero or negative
+        const duration = 1800;
         const totalFrames = duration / 16;
-        const increment = end / totalFrames;
+        const increment = num / totalFrames;
         let timer: ReturnType<typeof setInterval>;
 
-        const startAnimation = () => {
+        const startAnim = () => {
             timer = setInterval(() => {
                 start += increment;
-                if (start >= end) {
-                    setDisplayValue(end);
+                if (start >= num) {
+                    setDisplay(num);
                     clearInterval(timer);
                 } else {
-                    setDisplayValue(Math.floor(start));
+                    setDisplay(Math.floor(start));
                 }
             }, 16);
         };
 
-        // delay is in seconds, convert to ms
-        const timeout = setTimeout(startAnimation, (delay || 0) * 1000);
-
+        const t = setTimeout(startAnim, (delay || 0) * 1000);
         return () => {
-            clearTimeout(timeout);
+            clearTimeout(t);
             if (timer) clearInterval(timer);
         };
-    }, [value, isInView, numericValue, delay]);
+    }, [num, isInView, delay]);
 
-    return <span>{displayValue}</span>;
+    return <span>{display}</span>;
 };
 
-export default function CompetitiveProgramming() {
-    const [cfData, setCfData] = useState<CodeforcesStats | null>(null);
+const CompetitiveProgramming: React.FC = () => {
+    const [data, setData] = useState<CodeforcesStats | null>(null);
     const [loading, setLoading] = useState(true);
-    const sectionRef = useRef(null);
-    const isInView = useInView(sectionRef, { once: false, amount: 0.2 });
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: false, amount: 0.2 });
 
     useEffect(() => {
-        const loadData = async () => {
-            // Fetch data when component comes into view, but only once to avoid spamming API
-            // User logic implies fetching when in view. Since we have a fallback, it's cheap to just run it.
-            // My utility handles errors.
+        const load = async () => {
             setLoading(true);
-            const data = await fetchCodeforcesStats();
-            setCfData(data);
+            const d = await fetchCodeforcesStats();
+            setData(d);
             setLoading(false);
         };
-
-        if (isInView && !cfData) {
-            loadData();
-        }
-    }, [isInView, cfData]);
+        if (isInView && !data) load();
+    }, [isInView, data]);
 
     return (
-        <section
-            ref={sectionRef}
-            className="cp-section"
-            id="competitive-programming"
-        >
-            <div className="cp-container">
-                <motion.h2
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                    transition={{ duration: 0.8 }}
-                    className="cp-title"
-                >
-                    Competitive Programming
-                </motion.h2>
+        <div ref={ref} className="cp">
+            <div className="shell">
+                <header className="chapter">
+                    <span className="chapter__index">05 / Sport</span>
+                    <span className="chapter__title">Algorithms in the wild</span>
+                    <span className="chapter__rule" />
+                </header>
 
-                <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="cp-subtitle"
-                >
-                </motion.p>
+                <div className="cp__head">
+                    <h2 className="cp__title">
+                        I take problems —<br />
+                        <em>seriously.</em>
+                    </h2>
+                    <p className="cp__sub">
+                        Outside of work, I solve problems on Codeforces. Sport for the
+                        brain. Numbers below are pulled live from the
+                        <a className="cp__link" href={`https://codeforces.com/profile/${data?.handle ?? 'fathi_sadi'}`}
+                            target="_blank" rel="noopener noreferrer"> public API</a>.
+                    </p>
+                </div>
 
-                {/* Terminal-style Container */}
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
-                    className="cp-terminal-wrapper"
-                >
-                    {/* Terminal Header */}
-                    <div className="cp-terminal-header">
-                        <div className="dot dot-red" />
-                        <div className="dot dot-yellow" />
-                        <div className="dot dot-green" />
-                        <span className="terminal-filename">
-                            Fathi.Terminal
-                        </span>
-                    </div>
-
-                    {/* Terminal Body */}
-                    <div className="cp-terminal-body">
-                        {loading && (
-                            <div className="cp-loading">
-                                <Activity className="cp-loading-icon" />
-                                <p>Loading competitive programming stats...</p>
-                            </div>
-                        )}
-
-                        {!loading && cfData && (
-                            <div className="space-y-8">
-                                {/* Stats Grid */}
-                                <div className="cp-stats-grid">
-                                    <motion.div
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={
-                                            isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }
-                                        }
-                                        transition={{ duration: 0.6, delay: 0.6 }}
-                                        className="cp-stat-card card-blue"
-                                    >
-                                        <div className="stat-header">
-                                            <Trophy className="stat-icon text-blue" />
-                                            <span className="text-slate">Current Rating</span>
-                                        </div>
-                                        <div className="stat-value text-blue">
-                                            <AnimatedNumber value={cfData.rating} delay={0.6} isInView={isInView} />
-                                        </div>
-                                        <div className="stat-sub text-purple">
-                                            {cfData.rank}
-                                        </div>
-                                    </motion.div>
-
-                                    <motion.div
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={
-                                            isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }
-                                        }
-                                        transition={{ duration: 0.6, delay: 0.7 }}
-                                        className="cp-stat-card card-purple"
-                                    >
-                                        <div className="stat-header">
-                                            <TrendingUp className="stat-icon text-purple" />
-                                            <span className="text-slate">Max Rating</span>
-                                        </div>
-                                        <div className="stat-value text-purple">
-                                            <AnimatedNumber value={cfData.maxRating} delay={0.7} isInView={isInView} />
-                                        </div>
-                                        <div className="stat-sub text-blue">
-                                            {cfData.maxRank}
-                                        </div>
-                                    </motion.div>
-
-                                    <motion.div
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={
-                                            isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }
-                                        }
-                                        transition={{ duration: 0.6, delay: 0.8 }}
-                                        className="cp-stat-card card-slate"
-                                    >
-                                        <div className="stat-header">
-                                            <Code className="stat-icon text-slate" />
-                                            <span className="text-slate">Problems Solved</span>
-                                        </div>
-                                        <div className="stat-value text-white">
-                                            <AnimatedNumber
-                                                value={cfData.problemsSolved}
-                                                delay={0.8}
-                                                isInView={isInView}
-                                            />
-                                        </div>
-                                    </motion.div>
-
-                                    <motion.div
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={
-                                            isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }
-                                        }
-                                        transition={{ duration: 0.6, delay: 0.9 }}
-                                        className="cp-stat-card card-slate"
-                                    >
-                                        <div className="stat-header">
-                                            <Activity className="stat-icon text-slate" />
-                                            <span className="text-slate">Contests</span>
-                                        </div>
-                                        <div className="stat-value text-white">
-                                            <AnimatedNumber
-                                                value={31}
-                                                delay={0.9}
-                                                isInView={isInView}
-                                            />
-                                        </div>
-                                    </motion.div>
-                                </div>
-
-                                {/* Handle Display */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={
-                                        isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
-                                    }
-                                    transition={{ duration: 0.6, delay: 1 }}
-                                    className="cp-handle-display"
-                                >
-                                    <p className="cp-handle-label">
-                                        Codeforces Handle
-                                    </p>
-                                    <a
-                                        href={`https://codeforces.com/profile/${cfData.handle}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="cp-handle-link"
-                                    >
-                                        @{cfData.handle}
-                                    </a>
-                                </motion.div>
-                            </div>
+                <div className="cp__panel">
+                    <div className="cp__panel-head">
+                        <div className="cp__dots">
+                            <i /><i /><i />
+                        </div>
+                        <span className="cp__panel-title">~ /codeforces — Fathi.Terminal</span>
+                        {data && (
+                            <a
+                                href={`https://codeforces.com/profile/${data.handle}`}
+                                target="_blank" rel="noopener noreferrer"
+                                className="cp__handle"
+                                data-magnetic
+                            >
+                                @{data.handle} ↗
+                            </a>
                         )}
                     </div>
-                </motion.div>
 
-                {/* Code Background Pattern */}
-                <div className="cp-bg-pattern">
-                    {Array.from({ length: 20 }).map((_, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ x: "100%" }}
-                            animate={{ x: "-100%" }}
-                            transition={{
-                                duration: 20 + i * 2,
-                                repeat: Infinity,
-                                ease: "linear",
-                            }}
-                            className="code-line"
-                        >
-                            {`function solve() { int n, m; cin >> n >> m; vector<int> dp(n + 1); for (int i = 0; i < n; i++) { ... } return answer; }`}
-                        </motion.div>
-                    ))}
+                    {loading ? (
+                        <div className="cp__loading">
+                            <span className="cp__loading-bar" />
+                            <span>Fetching stats…</span>
+                        </div>
+                    ) : data ? (
+                        <div className="cp__grid">
+                            <motion.div
+                                initial={{ opacity: 0, y: 24 }}
+                                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                                transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                                className="cp__cell cp__cell--big"
+                            >
+                                <span className="cp__cell-label">— Current Rating</span>
+                                <span className="cp__cell-num">
+                                    <AnimatedNumber value={data.rating} isInView={isInView} delay={0.4} />
+                                </span>
+                                <span className="cp__cell-sub">{data.rank}</span>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 24 }}
+                                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                                transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                                className="cp__cell"
+                            >
+                                <span className="cp__cell-label">— Peak</span>
+                                <span className="cp__cell-num cp__cell-num--small">
+                                    <AnimatedNumber value={data.maxRating} isInView={isInView} delay={0.5} />
+                                </span>
+                                <span className="cp__cell-sub">{data.maxRank}</span>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 24 }}
+                                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                                transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                                className="cp__cell"
+                            >
+                                <span className="cp__cell-label">— Solved</span>
+                                <span className="cp__cell-num cp__cell-num--small">
+                                    <AnimatedNumber value={data.problemsSolved} isInView={isInView} delay={0.6} />
+                                </span>
+                                <span className="cp__cell-sub">problems</span>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 24 }}
+                                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                                transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                className="cp__cell"
+                            >
+                                <span className="cp__cell-label">— Contests</span>
+                                <span className="cp__cell-num cp__cell-num--small">
+                                    <AnimatedNumber value={31} isInView={isInView} delay={0.7} />
+                                </span>
+                                <span className="cp__cell-sub">rounds</span>
+                            </motion.div>
+
+                            <motion.pre
+                                initial={{ opacity: 0 }}
+                                animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+                                transition={{ duration: 0.7, delay: 0.6 }}
+                                className="cp__cell cp__cell--terminal"
+                            >
+                                <span className="cp__line"><i className="cp__prompt">$</i> whoami</span>
+                                <span className="cp__line cp__line--out">  fathi · software engineer</span>
+                                <span className="cp__line"><i className="cp__prompt">$</i> cat goal.txt</span>
+                                <span className="cp__line cp__line--out">  outlast frameworks. think in systems.</span>
+                                <span className="cp__line cp__line--out">  decompose ruthlessly.</span>
+                                <span className="cp__line"><i className="cp__prompt">$</i> _ <i className="cp__caret" /></span>
+                            </motion.pre>
+                        </div>
+                    ) : null}
                 </div>
             </div>
-        </section>
+
+            <div className="cp__bg" aria-hidden="true">
+                {Array.from({ length: 12 }).map((_, i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ x: '100%' }}
+                        animate={{ x: '-100%' }}
+                        transition={{ duration: 28 + i * 3, repeat: Infinity, ease: 'linear' }}
+                        className="cp__bg-line"
+                        style={{ top: `${(i / 12) * 100}%` }}
+                    >
+                        {`function solve() { int n, m; cin >> n >> m; vector<int> dp(n + 1); for (int i = 0; i < n; i++) { ... } return answer; }`}
+                    </motion.div>
+                ))}
+            </div>
+        </div>
     );
-}
+};
+
+export default CompetitiveProgramming;

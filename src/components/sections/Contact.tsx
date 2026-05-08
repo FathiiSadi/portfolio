@@ -2,227 +2,177 @@ import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useForm, ValidationError } from '@formspree/react';
-import EnergyRibbons from '../effects/EnergyRibbons';
 import './Contact.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Contact: React.FC = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
-    const formRef = useRef<HTMLFormElement>(null);
-    const linksRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLDivElement>(null);
 
-    const [state, handleFormspreeSubmit] = useForm("mykdwkpw");
-    const [localErrors, setLocalErrors] = React.useState<{ [key: string]: string }>({});
+    const [state, handleFormspreeSubmit] = useForm('mykdwkpw');
+    const [localErrors, setLocalErrors] = React.useState<Record<string, string>>({});
 
     useEffect(() => {
         if (!sectionRef.current) return;
-
         const ctx = gsap.context(() => {
-            // ... (keep current GSAP animations)
-            // Title Animation (Massive Typography)
-            const chars = titleRef.current?.querySelectorAll('.char');
+            const chars = titleRef.current?.querySelectorAll('.ch');
             if (chars) {
-                gsap.fromTo(chars,
-                    {
-                        y: 200,
-                        rotateX: -90,
-                        opacity: 0
-                    },
-                    {
-                        y: 0,
-                        rotateX: 0,
-                        opacity: 1,
-                        duration: 1.2,
-                        stagger: 0.03,
-                        ease: 'power4.out',
-                        scrollTrigger: {
-                            trigger: titleRef.current,
-                            start: 'top 90%',
-                        }
-                    }
-                );
+                gsap.from(chars, {
+                    yPercent: 110,
+                    opacity: 0,
+                    duration: 1.1,
+                    stagger: 0.04,
+                    ease: 'expo.out',
+                    scrollTrigger: { trigger: titleRef.current, start: 'top 85%' },
+                });
             }
-
-            // Form animations
-            gsap.fromTo('.form-group',
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1,
-                    stagger: 0.1,
-                    ease: 'power3.out',
-                    scrollTrigger: {
-                        trigger: '.contact-form-side', // Adjusted trigger
-                        start: 'top 85%',
-                    }
-                }
-            );
-
-            // Magnetic effect for social links and button
-            const magneticElements = sectionRef.current?.querySelectorAll('.magnetic-target');
-            magneticElements?.forEach((el: Element) => {
-                const target = el as HTMLElement;
-                const handleMouseMove = (e: MouseEvent) => {
-                    const rect = target.getBoundingClientRect();
-                    const x = e.clientX - rect.left - rect.width / 2;
-                    const y = e.clientY - rect.top - rect.height / 2;
-
-                    gsap.to(target, {
-                        x: x * 0.4,
-                        y: y * 0.4,
-                        duration: 0.4,
-                        ease: 'power2.out'
-                    });
-                };
-
-                const handleMouseLeave = () => {
-                    gsap.to(target, {
-                        x: 0,
-                        y: 0,
-                        duration: 0.7,
-                        ease: 'elastic.out(1, 0.3)'
-                    });
-                };
-
-                target.addEventListener('mousemove', handleMouseMove);
-                target.addEventListener('mouseleave', handleMouseLeave);
+            gsap.from('.contact-form .field', {
+                opacity: 0,
+                y: 24,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: '.contact-form', start: 'top 88%' },
             });
         }, sectionRef);
-
         return () => {
             ctx.revert();
             ScrollTrigger.getAll().forEach(st => st.kill());
         };
-    }, [state.succeeded]); // Re-run animations if form resets
+    }, [state.succeeded]);
 
-    const validateForm = (data: FormData) => {
-        const errors: { [key: string]: string } = {};
-        const name = data.get('name') as string;
-        const email = data.get('email') as string;
-        const message = data.get('message') as string;
-
-        if (!name || name.trim().length === 0) {
-            errors.name = 'Please enter your name.';
-        }
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            errors.email = 'Please enter a valid email address.';
-        }
-        if (!message || message.trim().length < 10) {
-            errors.message = 'Message must be at least 10 characters long.';
-        }
-
-        return errors;
+    const validate = (data: FormData) => {
+        const errs: Record<string, string> = {};
+        const name = (data.get('name') as string) || '';
+        const email = (data.get('email') as string) || '';
+        const message = (data.get('message') as string) || '';
+        if (!name.trim()) errs.name = 'Your name, please.';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'A valid email helps me reply.';
+        if (message.trim().length < 10) errs.message = '10 characters minimum — give me a little to go on.';
+        return errs;
     };
 
-    const handleCustomSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const errors = validateForm(formData);
-
-        if (Object.keys(errors).length > 0) {
-            setLocalErrors(errors);
+        const data = new FormData(e.currentTarget);
+        const errs = validate(data);
+        if (Object.keys(errs).length) {
+            setLocalErrors(errs);
             return;
         }
-
         setLocalErrors({});
         handleFormspreeSubmit(e);
     };
 
-    const splitTitle = (text: string) => {
-        return text.split('').map((char, i) => (
-            <span key={i} className="char" style={{ display: 'inline-block' }}>
-                {char === ' ' ? '\u00A0' : char}
+    const split = (text: string) =>
+        text.split('').map((c, i) => (
+            <span key={i} className="ch" style={{ display: 'inline-block' }}>
+                {c === ' ' ? ' ' : c}
             </span>
         ));
-    };
 
     return (
-        <section ref={sectionRef} id="contact" className="contact section">
-            <EnergyRibbons />
+        <div ref={sectionRef} className="contact section" id="contact">
+            <div className="shell">
+                <header className="chapter">
+                    <span className="chapter__index">06 / Contact</span>
+                    <span className="chapter__title">Send a signal</span>
+                    <span className="chapter__rule" />
+                </header>
 
-            <div className="container">
-                <div ref={titleRef} className="massive-title-wrapper">
-                    <h2 className="massive-title">
-                        <div className="title-row">{splitTitle("LET'S WORK")}</div>
-                        <div className="title-row">{splitTitle("TOGETHER")}</div>
-                    </h2>
+                <div ref={titleRef} className="contact-title">
+                    <span className="contact-title__line">{split('Let\'s')} <em>{split('build')}</em></span>
+                    <span className="contact-title__line">{split('something')} <em className="contact-title__em--acid">{split('useful.')}</em></span>
                 </div>
 
-                <div className="contact-main-grid">
-                    <div className="contact-visual-side">
-                        <div className="contact-stats">
-                            <p className="contact-tag">AVAILABLE FOR FREELANCE</p>
-                            <p className="contact-location">BASED IN AMMAN, JORDAN</p>
-                        </div>
-
-                        <div ref={linksRef} className="modern-social-list">
+                <div className="contact-grid">
+                    <aside className="contact-aside">
+                        <span className="eyebrow eyebrow--acid">— Direct lines</span>
+                        <ul className="contact-lines">
                             {[
-                                { label: 'Email', href: 'mailto:fathii.alsadi@gmail.com', icon: '✉' },
-                                { label: 'LinkedIn', href: 'https://www.linkedin.com/in/fathi-sadi/', icon: 'in' },
-                                { label: 'GitHub', href: 'https://github.com/FathiiSadi', icon: 'git' }
-                            ].map((link, idx) => (
-                                <a key={idx} href={link.href} className="modern-social-item magnetic-target" target="_blank" rel="noopener noreferrer">
-                                    <span className="item-icon">{link.icon}</span>
-                                    <span className="item-label">{link.label}</span>
-                                    <span className="item-arrow">↗</span>
-                                </a>
+                                { label: 'Email', val: 'fathii.alsadi@gmail.com', href: 'mailto:fathii.alsadi@gmail.com' },
+                                { label: 'LinkedIn', val: '/in/fathi-sadi', href: 'https://www.linkedin.com/in/fathi-sadi/' },
+                                { label: 'GitHub', val: '@FathiiSadi', href: 'https://github.com/FathiiSadi' },
+                                { label: 'Codeforces', val: '@fathi_sadi', href: 'https://codeforces.com/profile/fathi_sadi' },
+                            ].map((l, i) => (
+                                <li key={i}>
+                                    <a href={l.href} target="_blank" rel="noopener noreferrer"
+                                        data-magnetic data-magnetic-strength="0.2" className="contact-line">
+                                        <span className="contact-line__label">{l.label}</span>
+                                        <span className="contact-line__val">{l.val}</span>
+                                        <span className="contact-line__arrow">↗</span>
+                                    </a>
+                                </li>
                             ))}
-                        </div>
-                    </div>
+                        </ul>
 
-                    <div className="contact-form-side">
+                        <div className="contact-meta">
+                            <div>
+                                <span className="eyebrow">— Based</span>
+                                <p>Amman, Jordan · GMT+3</p>
+                            </div>
+                            <div>
+                                <span className="eyebrow eyebrow--acid">— Status</span>
+                                <p>Available · Q3 2026</p>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div className="contact-form-wrap">
                         {state.succeeded ? (
-                            <div className="form-success-message">
-                                <h3 className="success-header">Message Sent!</h3>
-                                <p>Thanks for reaching out. I'll get back to you soon.</p>
-                                <button onClick={() => window.location.reload()} className="reload-btn">SEND ANOTHER</button>
+                            <div className="contact-success">
+                                <span className="eyebrow eyebrow--acid">— Sent</span>
+                                <h3>Got it. Thanks for reaching out.</h3>
+                                <p>I'll come back to you within a day or two.</p>
+                                <button onClick={() => window.location.reload()} className="btn-pill" data-magnetic>
+                                    <span className="btn-pill__dot" />
+                                    Send another
+                                </button>
                             </div>
                         ) : (
-                            <form ref={formRef} className="modern-contact-form" onSubmit={handleCustomSubmit}>
-                                <div className="form-group">
-                                    <span className="group-number">01</span>
-                                    <label htmlFor="name">What's your name?</label>
-                                    <input type="text" id="name" name="name" required placeholder="Fathi Al-Sadi *" />
-                                    {localErrors.name && <span className="form-error">{localErrors.name}</span>}
-                                    <ValidationError prefix="Name" field="name" errors={state.errors} className="form-error" />
-                                    <div className="line-highlight"></div>
+                            <form className="contact-form" onSubmit={submit}>
+                                <div className="field">
+                                    <label htmlFor="c-name">
+                                        <span className="field__num">01</span>
+                                        <span className="field__q">What's your name?</span>
+                                    </label>
+                                    <input type="text" id="c-name" name="name" placeholder="Your full name *" />
+                                    {localErrors.name && <span className="field__err">{localErrors.name}</span>}
+                                    <ValidationError prefix="Name" field="name" errors={state.errors} className="field__err" />
                                 </div>
 
-                                <div className="form-group">
-                                    <span className="group-number">02</span>
-                                    <label htmlFor="email">What's your email?</label>
-                                    <input type="email" id="email" name="email" required placeholder="fathisadi49@gmail.com *" />
-                                    {localErrors.email && <span className="form-error">{localErrors.email}</span>}
-                                    <ValidationError prefix="Email" field="email" errors={state.errors} className="form-error" />
-                                    <div className="line-highlight"></div>
+                                <div className="field">
+                                    <label htmlFor="c-email">
+                                        <span className="field__num">02</span>
+                                        <span className="field__q">Where can I reach you?</span>
+                                    </label>
+                                    <input type="email" id="c-email" name="email" placeholder="you@example.com *" />
+                                    {localErrors.email && <span className="field__err">{localErrors.email}</span>}
+                                    <ValidationError prefix="Email" field="email" errors={state.errors} className="field__err" />
                                 </div>
 
-                                <div className="form-group">
-                                    <span className="group-number">03</span>
-                                    <label htmlFor="message">Your message</label>
-                                    <textarea id="message" name="message" required placeholder="Hello Fathi, I'd like to talk about..." rows={4}></textarea>
-                                    {localErrors.message && <span className="form-error">{localErrors.message}</span>}
-                                    <ValidationError prefix="Message" field="message" errors={state.errors} className="form-error" />
-                                    <div className="line-highlight"></div>
+                                <div className="field">
+                                    <label htmlFor="c-message">
+                                        <span className="field__num">03</span>
+                                        <span className="field__q">Tell me everything.</span>
+                                    </label>
+                                    <textarea id="c-message" name="message" placeholder="Hi Fathi — I'd like to talk about…" rows={5} />
+                                    {localErrors.message && <span className="field__err">{localErrors.message}</span>}
+                                    <ValidationError prefix="Message" field="message" errors={state.errors} className="field__err" />
                                 </div>
 
-                                <div className="form-submit-wrapper">
-                                    <button type="submit" disabled={state.submitting} className="modern-submit-btn magnetic-target">
-                                        <div className="btn-circle">
-                                            <span className="btn-text">{state.submitting ? 'SENDING...' : 'SEND'}</span>
-                                            <span className="btn-icon">→</span>
-                                        </div>
-                                    </button>
-                                </div>
+                                <button type="submit" disabled={state.submitting} className="contact-submit"
+                                    data-magnetic data-magnetic-strength="0.3" data-cursor="view" data-cursor-label="Send">
+                                    <span>{state.submitting ? 'Sending…' : 'Send'}</span>
+                                    <span className="contact-submit__arrow">↗</span>
+                                </button>
                             </form>
                         )}
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
 
