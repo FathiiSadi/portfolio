@@ -144,8 +144,8 @@ const Projects: React.FC = () => {
                         <span className="projects-title__small">— vol. 01</span>
                     </h2>
                     <p className="projects-sub">
-                        Four shipped systems. Each one solved a real problem under real
-                        constraints. Click any title to open the case study.
+                        <span className="projects-sub__lead">Four shipped systems.</span>
+                        Each one solved a real problem under real constraints.
                     </p>
                 </div>
 

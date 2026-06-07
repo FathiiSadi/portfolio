@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
                         <ul>
                             <li><a href="https://github.com/FathiiSadi" target="_blank" rel="noopener noreferrer">GitHub ↗</a></li>
                             <li><a href="https://www.linkedin.com/in/fathi-sadi/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a></li>
-                            <li><a href="https://codeforces.com/profile/fathi_sadi" target="_blank" rel="noopener noreferrer">Codeforces ↗</a></li>
+                            <li><a href="https://codeforces.com/profile/SolveXJO" target="_blank" rel="noopener noreferrer">Codeforces ↗</a></li>
                             <li><a href="mailto:fathii.alsadi@gmail.com">Email ↗</a></li>
                         </ul>
                     </div>

@@ -1,253 +1,197 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './About.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const STACK = [
-    { k: 'Backend', v: 'Laravel · Node · PHP' },
-    { k: 'Frontend', v: 'Vue · React · TS' },
-    { k: 'Data', v: 'MySQL · Postgres · MongoDB' },
-    { k: 'Infra', v: 'Docker · Cloud · Linux' },
-    { k: 'AI', v: 'RAG · LangChain · FAISS' },
-];
-
-const FACTS = [
-    { k: 'Based', v: 'Amman, Jordan' },
-    { k: 'TZ', v: 'GMT+3' },
-    { k: 'Edu', v: 'B.Sc. CS · HTU' },
-    { k: 'Lang', v: 'AR · EN' },
+const BEATS = [
+  {
+    idx: '01', tag: 'Origin',
+    title: 'It started at HTU.',
+    body: 'What began as curiosity became a foundation. HTU introduced me to software engineering, problem-solving, and the mindset of building things that matter.',
+  },
+  {
+    idx: '02', tag: 'Growth',
+    title: 'Then it got real.',
+    body: 'Joining Altibbi changed the scale. My work started reaching real users, real systems, and real business impact.',
+  },
+  {
+    idx: '03', tag: 'Ambition',
+    title: 'Now: the hard room.',
+    body: "Focused on operating at the highest level—solving harder problems, building larger systems, and preparing for the world's most demanding engineering teams.",
+  },
 ];
 
 const About: React.FC = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
-    const tickerRef = useRef<HTMLDivElement>(null);
-    const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const beatsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const [active, setActive] = useState(0);
 
-    useEffect(() => {
-        if (!sectionRef.current) return;
-        const ctx = gsap.context(() => {
-            // Reveal each cell on scroll
-            gsap.utils.toArray<HTMLElement>('.bento-cell').forEach((cell, i) => {
-                gsap.from(cell, {
-                    opacity: 0,
-                    y: 36,
-                    duration: 0.9,
-                    delay: (i % 3) * 0.05,
-                    ease: 'power3.out',
-                    scrollTrigger: {
-                        trigger: cell,
-                        start: 'top 88%',
-                        toggleActions: 'play none none none',
-                    },
-                });
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Headline reveals char-by-char
+      gsap.from('.about__head .ch', {
+        yPercent: 115, opacity: 0, duration: 1, stagger: 0.025, ease: 'expo.out',
+        scrollTrigger: { trigger: '.about__head', start: 'top 82%' },
+      });
+
+      beatsRef.current.forEach((beat, i) => {
+        if (!beat) return;
+        // Each beat's lines slide up in sequence
+        gsap.from(beat.querySelectorAll('.about__rev'), {
+          y: 42, opacity: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out',
+          scrollTrigger: { trigger: beat, start: 'top 78%' },
+        });
+        // Drive the active beat → morphs the sticky visual
+        ScrollTrigger.create({
+          trigger: beat,
+          start: 'top 55%',
+          end: 'bottom 55%',
+          onToggle: (self) => { if (self.isActive) setActive(i); },
+        });
+      });
+
+      // CSS `position: sticky` doesn't work inside the transform-based smooth
+      // scroll (the content wrapper is fixed + translated, so there's nothing
+      // for sticky to stick to). Emulate the pin by translating the panel down
+      // at the same rate the page scrolls up, keeping it parked at ~18vh while
+      // the three beats pass — so every scene is seen, not just the first.
+      if (window.matchMedia('(min-width: 861px)').matches) {
+        const col = sectionRef.current?.querySelector<HTMLElement>('.about__visual');
+        const panel = sectionRef.current?.querySelector<HTMLElement>('.about__visual-inner');
+        if (col && panel) {
+          gsap.fromTo(panel,
+            { y: 0 },
+            {
+              y: () => Math.max(0, col.offsetHeight - panel.offsetHeight),
+              ease: 'none',
+              scrollTrigger: {
+                trigger: col,
+                start: 'top 18%',
+                end: () => '+=' + Math.max(0, col.offsetHeight - panel.offsetHeight),
+                scrub: true,
+                invalidateOnRefresh: true,
+              },
             });
+        }
+      }
 
-            // Big italic word reveals letter-by-letter
-            const chars = sectionRef.current!.querySelectorAll('.about__pull .ch');
-            gsap.from(chars, {
-                yPercent: 110,
-                opacity: 0,
-                duration: 1.1,
-                stagger: 0.04,
-                ease: 'expo.out',
-                scrollTrigger: {
-                    trigger: '.about__pull',
-                    start: 'top 80%',
-                },
-            });
+      ScrollTrigger.refresh();
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
 
-            // Marquee ticker — infinite linear translate
-            if (tickerRef.current) {
-                const inner = tickerRef.current.querySelector('.about-ticker__track') as HTMLElement;
-                gsap.to(inner, {
-                    xPercent: -50,
-                    duration: 28,
-                    ease: 'none',
-                    repeat: -1,
-                });
-            }
-        }, sectionRef);
-        return () => ctx.revert();
-    }, []);
+  // Per-word groups keep letters from breaking mid-word while each char stays a `.ch`.
+  const split = (t: string) =>
+    t.split(' ').map((word, wi, arr) => (
+      <Fragment key={wi}>
+        <span className="word">
+          {word.split('').map((c, i) => (
+            <span key={i} className="ch" style={{ display: 'inline-block' }}>{c}</span>
+          ))}
+        </span>
+        {wi < arr.length - 1 ? ' ' : null}
+      </Fragment>
+    ));
 
-    // Portrait card 3D tilt
-    const handleTilt = (e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12;
-        const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12;
-        setTilt({ x, y });
-    };
-    const resetTilt = () => setTilt({ x: 0, y: 0 });
+  return (
+    <div ref={sectionRef} className="about section">
+      <div className="shell">
+        <header className="chapter">
+          <span className="chapter__index">02</span>
+          <span className="chapter__title">About · The story</span>
+          <span className="chapter__rule" />
+        </header>
 
-    const splitChars = (text: string) =>
-        text.split('').map((c, i) => (
-            <span key={i} className="ch" style={{ display: 'inline-block' }}>
-                {c === ' ' ? ' ' : c}
-            </span>
-        ));
+        <h2 className="about__head">
+          {split('I build systems,')}
+          <br />
+          <em>{split('not just features.')}</em>
+        </h2>
 
-    return (
-        <div ref={sectionRef} className="about section">
-            <div className="shell">
-                <header className="chapter">
-                    <span className="chapter__index">02 / Profile</span>
-                    <span className="chapter__title">An engineer's blueprint</span>
-                    <span className="chapter__rule" />
-                </header>
+        <div className="about__inner">
+          {/* Left — scrolling story beats */}
+          <div className="about__beats">
+            {BEATS.map((b, i) => (
+              <div
+                key={b.idx}
+                ref={(el) => { beatsRef.current[i] = el; }}
+                className={`about__beat ${active === i ? 'is-active' : ''}`}
+              >
+                <span className="about__beat-tag about__rev">[ {b.idx} · {b.tag} ]</span>
+                <h3 className="about__beat-title about__rev">{b.title}</h3>
+                <p className="about__beat-body about__rev">{b.body}</p>
+              </div>
+            ))}
+          </div>
 
-                {/* Big italic pull-quote */}
-                <h2 className="about__pull">
-                    <span className="about__pull-line">
-                        {splitChars('I think in')} <em className="about__pull-em">{splitChars('systems')}</em>
-                    </span>
-                    <span className="about__pull-line">
-                        {splitChars('then I write')} <em className="about__pull-em about__pull-em--acid">{splitChars('the code.')}</em>
-                    </span>
-                </h2>
+          {/* Right — sticky visual that morphs per beat */}
+          <div className="about__visual">
+            <div className="about__visual-inner">
+              <div className="about__progress">
+                {BEATS.map((_, i) => (
+                  <span key={i} className={`about__progress-dot ${active >= i ? 'is-on' : ''}`} />
+                ))}
+              </div>
 
-                {/* Bento grid */}
-                <div className="bento">
-                    {/* Identity card / portrait */}
-                    <div
-                        className="bento-cell bento-cell--identity"
-                        onMouseMove={handleTilt}
-                        onMouseLeave={resetTilt}
-                        style={{ transform: `perspective(900px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)` }}
-                    >
-                        <div className="bento-id">
-                            <div className="bento-id__top">
-                                <span className="bento-id__tag">— ID / 0001</span>
-                                <span className="bento-id__chip">PASSPORT</span>
-                            </div>
-                            <div className="bento-id__name">
-                                Fathi
-                                <em>Al-Sadi</em>
-                            </div>
-                            <div className="bento-id__rows">
-                                <div><span>Role</span><strong>Software engineer</strong></div>
-                                <div><span>Field</span><strong>Backends · full-stack</strong></div>
-                                <div><span>Status</span><strong className="bento-id__avail">Available · Q2</strong></div>
-                            </div>
-                            <div className="bento-id__sig">
-                                <svg viewBox="0 0 200 60" width="120" height="36" fill="none">
-                                    <path d="M5 40 C 25 10, 45 50, 65 25 S 105 50, 125 30 S 165 35, 195 18"
-                                        stroke="var(--acid)" strokeWidth="1.4" strokeLinecap="round"
-                                        strokeDasharray="220" strokeDashoffset="0" />
-                                </svg>
-                                <span className="bento-id__sig-label">Fathi Al.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Manifesto */}
-                    <div className="bento-cell bento-cell--manifesto">
-                        <span className="eyebrow eyebrow--acid">— Manifesto</span>
-                        <p className="bento-manifesto">
-                            Before a single line, I think in <em>systems</em>. Every feature is
-                            a trade-off. Every abstraction has a cost. I value
-                            <em> clarity over cleverness</em>, simplicity over noise,
-                            and decisions you can defend three years from now.
-                        </p>
-                        <div className="bento-manifesto__rules">
-                            <span>· Decompose ruthlessly</span>
-                            <span>· Boring tech wins</span>
-                            <span>· Write for the next engineer</span>
-                        </div>
-                    </div>
-
-                    {/* Stack */}
-                    <div className="bento-cell bento-cell--stack">
-                        <span className="eyebrow">— Stack</span>
-                        <ul className="bento-stack">
-                            {STACK.map((s) => (
-                                <li key={s.k}>
-                                    <span>{s.k}</span>
-                                    <em>{s.v}</em>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Big numeric stat: years experience or solved problems */}
-                    <div className="bento-cell bento-cell--stat">
-                        <span className="eyebrow">— Range</span>
-                        <div className="bento-stat__num">
-                            <span>2</span>
-                            <span className="bento-stat__unit">+</span>
-                        </div>
-                        <span className="bento-stat__label">Years of software engineering</span>
-                    </div>
-
-                    {/* Code-style philosophy block */}
-                    <div className="bento-cell bento-cell--code">
-                        <div className="bento-code__head">
-                            <span className="bento-code__dot bento-code__dot--r" />
-                            <span className="bento-code__dot bento-code__dot--y" />
-                            <span className="bento-code__dot bento-code__dot--g" />
-                            <span className="bento-code__title">~ /philosophy.ts</span>
-                        </div>
-                        <pre className="bento-code__body">
-                            <code>{`const build = (problem) => {
-  const truth = decompose(problem);
-  return truth
-    .map(simpleFirst)
-    .filter(actuallyShip);
-};`}</code>
-                        </pre>
-                    </div>
-
-                    {/* Facts strip */}
-                    <div className="bento-cell bento-cell--facts">
-                        <span className="eyebrow">— Facts</span>
-                        <ul className="bento-facts">
-                            {FACTS.map((f) => (
-                                <li key={f.k}>
-                                    <span>{f.k}</span>
-                                    <em>{f.v}</em>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Now playing / current focus */}
-                    <div className="bento-cell bento-cell--now">
-                        <span className="eyebrow">— Now</span>
-                        <div className="bento-now">
-                            <div className="bento-now__pill">
-                                <span className="bento-now__pulse" />
-                                In session
-                            </div>
-                            <h3 className="bento-now__title">
-                                Healthcare platform — <em>Altibbi</em>.
-                            </h3>
-                            <p>
-                                Architecture, performance and the boring parts that
-                                make a product feel sturdy.
-                            </p>
-                        </div>
-                    </div>
+              {/* Scene 0 — Origin: a terminal booting the first system */}
+              <div className={`about__scene ${active === 0 ? 'is-active' : ''}`}>
+                <div className="about__win">
+                  <div className="about__win-head">
+                    <span className="about__win-dot" /><span className="about__win-dot" /><span className="about__win-dot about__win-dot--on" />
+                    <span className="about__win-name">~/htu — origin</span>
+                  </div>
+                  <pre className="about__win-body">
+                    <span><i>$</i> git init</span>
+                    <span className="o">initialized empty repository</span>
+                    <span><i>$</i> ./ship --first-real-system</span>
+                    <span className="o">build ok · deployed · users online</span>
+                    <span><i>$</i> <em className="about__cur" /></span>
+                  </pre>
                 </div>
+              </div>
 
-                {/* Marquee ticker at the bottom */}
-                <div ref={tickerRef} className="about-ticker" aria-hidden="true">
-                    <div className="about-ticker__track">
-                        {Array.from({ length: 2 }).map((_, j) => (
-                            <div key={j} className="about-ticker__group">
-                                <span>Systems first</span><span className="about-ticker__dot">●</span>
-                                <span>Backends that scale</span><span className="about-ticker__dot">●</span>
-                                <span>Boring tech wins</span><span className="about-ticker__dot">●</span>
-                                <span>Open to remote</span><span className="about-ticker__dot">●</span>
-                                <span>Available · 2026</span><span className="about-ticker__dot">●</span>
-                                <span>Amman → ∞</span><span className="about-ticker__dot">●</span>
-                            </div>
-                        ))}
-                    </div>
+              {/* Scene 1 — Growth: production metrics */}
+              <div className={`about__scene ${active === 1 ? 'is-active' : ''}`}>
+                <div className="about__win">
+                  <div className="about__win-head">
+                    <span className="about__win-dot" /><span className="about__win-dot" /><span className="about__win-dot about__win-dot--on" />
+                    <span className="about__win-name">~/altibbi — production</span>
+                  </div>
+                  <div className="about__metrics">
+                    {[
+                      { k: 'uptime', v: '99.9%', w: '99%' },
+                      { k: 'p95 latency', v: '120ms', w: '72%' },
+                      { k: 'bugs shipped', v: 'low', w: '18%' },
+                      { k: 'ownership', v: 'high', w: '92%' },
+                    ].map((m) => (
+                      <div key={m.k} className="about__metric">
+                        <div className="about__metric-top">
+                          <span>{m.k}</span><em>{m.v}</em>
+                        </div>
+                        <div className="about__metric-bar"><span style={{ width: m.w }} /></div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              </div>
+
+              {/* Scene 2 — Ambition: target rings */}
+              <div className={`about__scene ${active === 2 ? 'is-active' : ''}`}>
+                <div className="about__target">
+                  <span className="about__ring about__ring--1" />
+                  <span className="about__ring about__ring--2" />
+                  <span className="about__ring about__ring--3" />
+                  <span className="about__target-core">HARD<br />PROBLEMS</span>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default About;

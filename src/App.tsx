@@ -3,7 +3,7 @@ import LoadingScreen from './components/layout/LoadingScreen';
 import Navbar from './components/layout/Navbar';
 import ScrollProgress from './components/layout/ScrollProgress';
 import BackToTop from './components/layout/BackToTop';
-import CustomCursor from './components/layout/CustomCursor';
+import Cursor from './components/Cursor';
 import Footer from './components/layout/Footer';
 import './styles/index.css';
 
@@ -19,6 +19,24 @@ function App() {
   const smoothRef = useRef<HTMLDivElement>(null);
 
   const handleLoadComplete = useCallback(() => setIsLoading(false), []);
+
+  // Scroll progress bar (acid line at top of viewport)
+  useEffect(() => {
+    const bar = document.createElement('div');
+    bar.className = 'scroll-progress';
+    document.body.prepend(bar);
+
+    const onScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      const pct = (scrollTop / (scrollHeight - clientHeight)) * 100;
+      bar.style.width = `${pct}%`;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      bar.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const safety = setTimeout(() => setIsLoading(false), 6500);
@@ -48,10 +66,11 @@ function App() {
 
   return (
     <>
+      <Cursor />
+      <div className="cursor-spotlight" aria-hidden="true" />
       {isLoading && <LoadingScreen onLoadComplete={handleLoadComplete} />}
       {!isLoading && (
         <>
-          <CustomCursor />
           <ScrollProgress />
           <Navbar />
           <BackToTop />

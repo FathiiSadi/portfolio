@@ -14,7 +14,9 @@ const Navbar: React.FC = () => {
     const [active, setActive] = useState('hero');
     const [scrolled, setScrolled] = useState(false);
     const [open, setOpen] = useState(false);
+    const [ind, setInd] = useState({ left: 0, width: 0, height: 0, ready: false });
     const timeRef = useRef<HTMLSpanElement>(null);
+    const linksRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         const onScroll = () => {
@@ -48,6 +50,24 @@ const Navbar: React.FC = () => {
         return () => clearInterval(id);
     }, []);
 
+    // Slide the acid pill to sit exactly behind the active link.
+    useEffect(() => {
+        const measure = () => {
+            const c = linksRef.current;
+            if (!c) return;
+            const el = c.querySelector<HTMLElement>(`[data-id="${active}"]`);
+            if (!el) return;
+            setInd({ left: el.offsetLeft, width: el.offsetWidth, height: el.offsetHeight, ready: true });
+        };
+        measure();
+        const t = window.setTimeout(measure, 300); // re-measure once webfonts settle
+        window.addEventListener('resize', measure);
+        return () => {
+            window.clearTimeout(t);
+            window.removeEventListener('resize', measure);
+        };
+    }, [active]);
+
     const goTo = (id: string) => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -67,14 +87,26 @@ const Navbar: React.FC = () => {
                         </span>
                     </button>
 
-                    <nav className="nav__links" aria-label="Sections">
+                    <nav className="nav__links" aria-label="Sections" ref={linksRef}>
+                        <span
+                            className="nav__indicator"
+                            aria-hidden="true"
+                            style={{
+                                left: ind.left,
+                                width: ind.width,
+                                height: ind.height,
+                                opacity: ind.ready ? 1 : 0,
+                            }}
+                        />
                         {NAV.map((n, i) => (
                             <button
                                 key={n.id}
+                                data-id={n.id}
                                 onClick={() => goTo(n.id)}
                                 className={`nav__link ${active === n.id ? 'nav__link--active' : ''}`}
                                 data-magnetic
                                 data-magnetic-strength="0.2"
+                                data-cursor-label={n.label}
                             >
                                 <span className="nav__link-num">{String(i + 1).padStart(2, '0')}</span>
                                 <span className="nav__link-text">{n.label}</span>
@@ -86,10 +118,6 @@ const Navbar: React.FC = () => {
                         <span className="nav__status">
                             <i className="nav__status-dot" />
                             Available
-                        </span>
-                        <span className="nav__time">
-                            <span className="nav__time-tz">AMM</span>
-                            <span ref={timeRef}>00:00:00</span>
                         </span>
                     </div>
 

@@ -28,6 +28,12 @@
     will-change: transform;
 }
 
+/* Keep each word's letters together so long words never split mid-word */
+.contact-title .word {
+    display: inline-block;
+    white-space: nowrap;
+}
+
 .contact-title em {
     color: var(--ink-300);
     font-style: italic;

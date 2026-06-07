@@ -65,11 +65,18 @@ const Contact: React.FC = () => {
         handleFormspreeSubmit(e);
     };
 
+    // Split into per-word groups so letters never break mid-word (e.g. "use-ful"),
+    // while keeping each letter as a `.ch` span for the stagger animation.
     const split = (text: string) =>
-        text.split('').map((c, i) => (
-            <span key={i} className="ch" style={{ display: 'inline-block' }}>
-                {c === ' ' ? ' ' : c}
-            </span>
+        text.split(' ').map((word, wi, arr) => (
+            <React.Fragment key={wi}>
+                <span className="word">
+                    {word.split('').map((c, i) => (
+                        <span key={i} className="ch" style={{ display: 'inline-block' }}>{c}</span>
+                    ))}
+                </span>
+                {wi < arr.length - 1 ? ' ' : null}
+            </React.Fragment>
         ));
 
     return (
@@ -94,7 +101,7 @@ const Contact: React.FC = () => {
                                 { label: 'Email', val: 'fathii.alsadi@gmail.com', href: 'mailto:fathii.alsadi@gmail.com' },
                                 { label: 'LinkedIn', val: '/in/fathi-sadi', href: 'https://www.linkedin.com/in/fathi-sadi/' },
                                 { label: 'GitHub', val: '@FathiiSadi', href: 'https://github.com/FathiiSadi' },
-                                { label: 'Codeforces', val: '@fathi_sadi', href: 'https://codeforces.com/profile/fathi_sadi' },
+                                { label: 'Codeforces', val: '@fathi_sadi', href: 'https://codeforces.com/profile/solveXJO' },
                             ].map((l, i) => (
                                 <li key={i}>
                                     <a href={l.href} target="_blank" rel="noopener noreferrer"
@@ -114,7 +121,7 @@ const Contact: React.FC = () => {
                             </div>
                             <div>
                                 <span className="eyebrow eyebrow--acid">— Status</span>
-                                <p>Available · Q3 2026</p>
+                                <p>Available ·</p>
                             </div>
                         </div>
                     </aside>
