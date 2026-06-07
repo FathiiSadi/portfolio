@@ -135,12 +135,12 @@ const Hero: React.FC = () => {
           <div className="hero__sidecard-sep" />
           <div className="hero__sidecard-row">
             <span className="hero__sidecard-key">Stack</span>
-            <span className="hero__sidecard-val">Laravel · React · Postgres</span>
+            <span className="hero__sidecard-val">Laravel · React</span>
           </div>
           <div className="hero__sidecard-sep" />
           <div className="hero__sidecard-row">
             <span className="hero__sidecard-key">CF</span>
-            <span className="hero__sidecard-val">31 contests · Specialist</span>
+            <span className="hero__sidecard-val">31 contests · Pupil</span>
           </div>
         </div>
       </div>
