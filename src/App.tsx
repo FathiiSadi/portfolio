@@ -1,94 +1,73 @@
-import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Experience from './three/Experience';
+import { useLenis } from './scroll/useLenis';
+import { scrollState, setChapter, SECTION_IDS } from './scroll/scrollState';
 import LoadingScreen from './components/layout/LoadingScreen';
 import Navbar from './components/layout/Navbar';
-import ScrollProgress from './components/layout/ScrollProgress';
-import BackToTop from './components/layout/BackToTop';
+import HUD from './components/layout/HUD';
 import Cursor from './components/Cursor';
 import Footer from './components/layout/Footer';
+import Hero from './components/sections/Hero';
+import About from './components/sections/About';
+import Skills from './components/sections/Skills';
+import Projects from './components/sections/Projects';
+import CompetitiveProgramming from './components/sections/CompetitiveProgramming';
+import Contact from './components/sections/Contact';
 import './styles/index.css';
 
-const Hero = lazy(() => import('./components/sections/Hero'));
-const About = lazy(() => import('./components/sections/About'));
-const Skills = lazy(() => import('./components/sections/Skills'));
-const Projects = lazy(() => import('./components/sections/Projects'));
-const CompetitiveProgramming = lazy(() => import('./components/sections/CompetitiveProgramming'));
-const Contact = lazy(() => import('./components/sections/Contact'));
+gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const smoothRef = useRef<HTMLDivElement>(null);
 
-  const handleLoadComplete = useCallback(() => setIsLoading(false), []);
+  // Sections stay mounted under the loader so the world can be measured
+  // and the canvas is already alive when the gate opens.
+  useLenis(!isLoading);
 
-  // Scroll progress bar (acid line at top of viewport)
-  useEffect(() => {
-    const bar = document.createElement('div');
-    bar.className = 'scroll-progress';
-    document.body.prepend(bar);
-
-    const onScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-      const pct = (scrollTop / (scrollHeight - clientHeight)) * 100;
-      bar.style.width = `${pct}%`;
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      bar.remove();
-    };
+  const handleLoadComplete = useCallback(() => {
+    setIsLoading(false);
+    scrollState.started = true;
   }, []);
 
+  // chapter readout follows whichever section owns the viewport center
   useEffect(() => {
-    const safety = setTimeout(() => setIsLoading(false), 6500);
-    if (isLoading) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
-    return () => {
-      clearTimeout(safety);
-      document.body.style.overflow = '';
-    };
-  }, [isLoading]);
-
-  // Lerp smooth scroll, mounted once after the loader leaves
-  useEffect(() => {
-    if (isLoading) return;
-    let handle: { destroy: () => void } | null = null;
-    let cancelled = false;
-    (async () => {
-      const { initSmoothScroll } = await import('./utils/smoothScroll');
-      if (cancelled || !smoothRef.current) return;
-      handle = initSmoothScroll(smoothRef.current);
-    })();
-    return () => {
-      cancelled = true;
-      handle?.destroy();
-    };
-  }, [isLoading]);
+    const triggers = SECTION_IDS.map((id) =>
+      ScrollTrigger.create({
+        trigger: `#${id}`,
+        start: 'top 50%',
+        end: 'bottom 50%',
+        onToggle: (self) => {
+          if (self.isActive) setChapter(id);
+        },
+      }),
+    );
+    return () => triggers.forEach((t) => t.kill());
+  }, []);
 
   return (
     <>
+      <Experience />
       <Cursor />
       <div className="cursor-spotlight" aria-hidden="true" />
+
       {isLoading && <LoadingScreen onLoadComplete={handleLoadComplete} />}
-      {!isLoading && (
-        <>
-          <ScrollProgress />
-          <Navbar />
-          <BackToTop />
-          <div id="smooth-content" ref={smoothRef}>
-            <main className="portfolio">
-              <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
-                <section id="hero"><Hero /></section>
-                <section id="about"><About /></section>
-                <section id="skills"><Skills /></section>
-                <section id="projects"><Projects /></section>
-                <section id="competitive"><CompetitiveProgramming /></section>
-                <section id="contact"><Contact /></section>
-              </Suspense>
-              <Footer />
-            </main>
-          </div>
-        </>
-      )}
+
+      <Navbar />
+      <HUD />
+
+      <div className="page">
+        <main>
+          <section id="hero"><Hero started={!isLoading} /></section>
+          <section id="about"><About /></section>
+          <section id="skills"><Skills /></section>
+          <section id="projects"><Projects /></section>
+          <section id="arena"><CompetitiveProgramming /></section>
+          <section id="contact"><Contact /></section>
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

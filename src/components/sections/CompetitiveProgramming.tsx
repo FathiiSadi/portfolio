@@ -54,7 +54,10 @@ const TypedTerminal: React.FC<{ isInView: boolean }> = ({ isInView }) => {
 
   useEffect(() => {
     if (!isInView || done) return;
-    if (lineIdx >= TERMINAL_LINES.length) { setDone(true); return; }
+    if (lineIdx >= TERMINAL_LINES.length) {
+      const t = setTimeout(() => setDone(true), 0);
+      return () => clearTimeout(t);
+    }
 
     const line = TERMINAL_LINES[lineIdx];
     if (charIdx < line.text.length) {
@@ -113,7 +116,7 @@ const CompetitiveProgramming: React.FC = () => {
   const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
   return (
-    <section ref={ref} className="cp section">
+    <div ref={ref} className="cp">
       {/* Scrolling code bg */}
       <div className="cp__bg" aria-hidden="true">
         {Array.from({ length: 10 }).map((_, i) => (
@@ -134,8 +137,8 @@ const CompetitiveProgramming: React.FC = () => {
 
       <div className="shell">
         <header className="chapter">
-          <span className="chapter__index">05</span>
-          <span className="chapter__title">Competitive Programming</span>
+          <span className="chapter__index">CH.05</span>
+          <span className="chapter__title">Arena · Competitive programming</span>
           <span className="chapter__rule" />
         </header>
 
@@ -278,7 +281,7 @@ const CompetitiveProgramming: React.FC = () => {
           ) : null}
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

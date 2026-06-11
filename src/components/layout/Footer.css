@@ -1,131 +1,102 @@
 .foot {
-    position: relative;
-    background: var(--ink-950);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding: clamp(80px, 12vh, 140px) 0 32px;
-    overflow: hidden;
+  position: relative;
+  padding: 16vh 0 40px;
+  background: linear-gradient(180deg, transparent, rgba(2, 2, 8, 0.85) 30%, var(--void));
+}
+
+.foot__fin {
+  text-align: center;
+  margin-bottom: 9vh;
+}
+
+.foot__fin-word {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(70px, 11vw, 170px);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(0, 229, 255, 0.45);
+  user-select: none;
+}
+
+/* credits roll */
+.foot__credits {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.foot__credit { display: flex; flex-direction: column; gap: 5px; }
+
+.foot__credit-role {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ghost-mute);
+}
+
+.foot__credit-name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--ghost);
+}
+
+.foot__credit:first-child .foot__credit-name {
+  font-size: clamp(26px, 3.4vw, 40px);
+  font-weight: 600;
+}
+
+/* elsewhere */
+.foot__elsewhere {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8vh;
+}
+
+.foot__link {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 11px 20px;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  color: var(--ghost-dim);
+  transition: color 0.3s, border-color 0.3s, background 0.3s;
+}
+
+.foot__link:hover {
+  color: var(--cyan);
+  border-color: var(--line-bright);
+  background: rgba(0, 229, 255, 0.05);
+}
+
+/* base line */
+.foot__base {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 9vh;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--ghost-mute);
 }
 
 .foot__top {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: clamp(28px, 4vw, 60px);
-    margin-bottom: clamp(60px, 9vh, 110px);
-    padding-bottom: 48px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--ghost-dim);
+  transition: color 0.3s;
 }
 
-@media (max-width: 760px) {
-    .foot__top {
-        grid-template-columns: 1fr;
-    }
-}
-
-.foot__col .eyebrow {
-    display: block;
-    margin-bottom: 18px;
-}
-
-.foot__col ul {
-    list-style: none;
-    display: grid;
-    gap: 10px;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    color: var(--ink-300);
-}
-
-.foot__col a {
-    transition: color 0.4s var(--ease-out-expo);
-}
-
-.foot__col a:hover {
-    color: var(--acid);
-}
-
-/* ── Mark: name with arrow nested inside ──────────── */
-
-.foot-mark {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 60px;
-}
-
-.foot-arrow {
-    width: clamp(180px, 22vw, 320px);
-    aspect-ratio: 1 / 1;
-    pointer-events: none;
-}
-
-.foot-arrow canvas {
-    display: block;
-}
-
-/* ── The big italic name reveal ───────────────────── */
-
-.foot-word {
-    position: relative;
-    text-align: center;
-    line-height: 0.84;
-    user-select: none;
-    z-index: 1;
-}
-
-.foot-word__row {
-    padding: 0 0.05em;
-}
-
-.foot-word__line {
-    display: inline-block;
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: clamp(4.5rem, 22vw, 22rem);
-    color: var(--ink-100);
-    letter-spacing: -0.045em;
-}
-
-.foot-word__line--em {
-    color: var(--acid);
-}
-
-/* ── Base bar ─────────────────────────────────────── */
-
-.foot__base {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--ink-400);
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.foot__base-mid {
-    color: var(--ink-500);
-}
-
-.foot__base-mid em {
-    font-style: italic;
-    color: var(--ink-200);
-    font-family: var(--font-display);
-    text-transform: none;
-    letter-spacing: 0;
-    margin: 0 4px;
-}
-
-.foot__base a {
-    color: var(--ink-200);
-    transition: color 0.4s;
-    cursor: none;
-}
-
-.foot__base a:hover {
-    color: var(--acid);
-}
+.foot__top:hover { color: var(--cyan); }

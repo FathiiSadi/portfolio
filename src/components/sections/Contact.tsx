@@ -80,11 +80,12 @@ const Contact: React.FC = () => {
         ));
 
     return (
-        <div ref={sectionRef} className="contact section" id="contact">
+        <div ref={sectionRef} className="contact">
+            <div className="contact__scrim" aria-hidden="true" />
             <div className="shell">
                 <header className="chapter">
-                    <span className="chapter__index">06 / Contact</span>
-                    <span className="chapter__title">Send a signal</span>
+                    <span className="chapter__index">CH.06</span>
+                    <span className="chapter__title">Transmit · Send a signal</span>
                     <span className="chapter__rule" />
                 </header>
 

@@ -1,155 +1,76 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { subscribeChapter, getChapter, CHAPTERS, SECTION_IDS } from '../../scroll/scrollState';
 import './Navbar.css';
 
-const NAV = [
-    { id: 'hero', label: 'Index' },
-    { id: 'about', label: 'Profile' },
-    { id: 'skills', label: 'Practice' },
-    { id: 'projects', label: 'Work' },
-    { id: 'competitive', label: 'Sport' },
-    { id: 'contact', label: 'Contact' },
+const LINKS = [
+  { href: '#about', num: '02', label: 'Origin' },
+  { href: '#projects', num: '04', label: 'Work' },
+  { href: '#arena', num: '05', label: 'Arena' },
+  { href: '#contact', num: '06', label: 'Transmit' },
 ];
 
 const Navbar: React.FC = () => {
-    const [active, setActive] = useState('hero');
-    const [scrolled, setScrolled] = useState(false);
-    const [open, setOpen] = useState(false);
-    const [ind, setInd] = useState({ left: 0, width: 0, height: 0, ready: false });
-    const timeRef = useRef<HTMLSpanElement>(null);
-    const linksRef = useRef<HTMLElement>(null);
+  const [chapter, setChapterState] = useState(getChapter());
+  const [open, setOpen] = useState(false);
 
-    useEffect(() => {
-        const onScroll = () => {
-            setScrolled(window.scrollY > 80);
-            for (const n of NAV) {
-                const el = document.getElementById(n.id);
-                if (!el) continue;
-                const r = el.getBoundingClientRect();
-                if (r.top <= window.innerHeight * 0.4 && r.bottom >= window.innerHeight * 0.4) {
-                    setActive(n.id);
-                    break;
-                }
-            }
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        onScroll();
-        return () => window.removeEventListener('scroll', onScroll);
-    }, []);
+  useEffect(() => subscribeChapter(() => setChapterState(getChapter())), []);
 
-    useEffect(() => {
-        const tick = () => {
-            if (!timeRef.current) return;
-            const d = new Date();
-            const hh = String(d.getHours()).padStart(2, '0');
-            const mm = String(d.getMinutes()).padStart(2, '0');
-            const ss = String(d.getSeconds()).padStart(2, '0');
-            timeRef.current.textContent = `${hh}:${mm}:${ss}`;
-        };
-        tick();
-        const id = setInterval(tick, 1000);
-        return () => clearInterval(id);
-    }, []);
+  // close the overlay when a link is chosen
+  const close = () => setOpen(false);
 
-    // Slide the acid pill to sit exactly behind the active link.
-    useEffect(() => {
-        const measure = () => {
-            const c = linksRef.current;
-            if (!c) return;
-            const el = c.querySelector<HTMLElement>(`[data-id="${active}"]`);
-            if (!el) return;
-            setInd({ left: el.offsetLeft, width: el.offsetWidth, height: el.offsetHeight, ready: true });
-        };
-        measure();
-        const t = window.setTimeout(measure, 300); // re-measure once webfonts settle
-        window.addEventListener('resize', measure);
-        return () => {
-            window.clearTimeout(t);
-            window.removeEventListener('resize', measure);
-        };
-    }, [active]);
+  useEffect(() => {
+    document.body.classList.toggle('menu-open', open);
+    return () => document.body.classList.remove('menu-open');
+  }, [open]);
 
-    const goTo = (id: string) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const y = el.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-        setOpen(false);
-    };
+  return (
+    <>
+      <header className="nav">
+        <a href="#hero" className="nav__brand" aria-label="Back to start">
+          <span className="nav__brand-glyph">F</span>
+          <span className="nav__brand-sep">/</span>
+          <span className="nav__brand-glyph nav__brand-glyph--dim">AS</span>
+        </a>
 
-    return (
-        <>
-            <header className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
-                <div className="nav__row">
-                    <button className="nav__brand magnetic" data-magnetic data-magnetic-strength="0.2" onClick={() => goTo('hero')}>
-                        <span className="nav__brand-mark">F</span>
-                        <span className="nav__brand-text">
-                            Fathi <em>Al-Sadi</em>
-                        </span>
-                    </button>
+        <div className="nav__chapter" aria-hidden="true">
+          <span className="nav__chapter-code">{chapter.code}</span>
+          <span className="nav__chapter-name">{chapter.name}</span>
+        </div>
 
-                    <nav className="nav__links" aria-label="Sections" ref={linksRef}>
-                        <span
-                            className="nav__indicator"
-                            aria-hidden="true"
-                            style={{
-                                left: ind.left,
-                                width: ind.width,
-                                height: ind.height,
-                                opacity: ind.ready ? 1 : 0,
-                            }}
-                        />
-                        {NAV.map((n, i) => (
-                            <button
-                                key={n.id}
-                                data-id={n.id}
-                                onClick={() => goTo(n.id)}
-                                className={`nav__link ${active === n.id ? 'nav__link--active' : ''}`}
-                                data-magnetic
-                                data-magnetic-strength="0.2"
-                                data-cursor-label={n.label}
-                            >
-                                <span className="nav__link-num">{String(i + 1).padStart(2, '0')}</span>
-                                <span className="nav__link-text">{n.label}</span>
-                            </button>
-                        ))}
-                    </nav>
+        <nav className="nav__links" aria-label="Primary">
+          {LINKS.map((l) => (
+            <a key={l.href} href={l.href} className="nav__link">
+              <sup>{l.num}</sup> {l.label}
+            </a>
+          ))}
+        </nav>
 
-                    <div className="nav__meta">
-                        <span className="nav__status">
-                            <i className="nav__status-dot" />
-                            Available
-                        </span>
-                    </div>
+        <button
+          className={`nav__burger ${open ? 'is-open' : ''}`}
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+        >
+          <span /><span />
+        </button>
+      </header>
 
-                    <button
-                        className={`nav__burger ${open ? 'nav__burger--open' : ''}`}
-                        onClick={() => setOpen(o => !o)}
-                        aria-label="Menu"
-                        aria-expanded={open}
-                    >
-                        <span /><span />
-                    </button>
-                </div>
-            </header>
-
-            <div className={`nav-sheet ${open ? 'nav-sheet--open' : ''}`} role="dialog">
-                <div className="nav-sheet__inner">
-                    <span className="nav-sheet__eyebrow">— Index</span>
-                    <ul className="nav-sheet__list">
-                        {NAV.map((n, i) => (
-                            <li key={n.id}>
-                                <button onClick={() => goTo(n.id)} className="nav-sheet__item">
-                                    <span className="nav-sheet__num">{String(i + 1).padStart(2, '0')}</span>
-                                    <span className="nav-sheet__label">{n.label}</span>
-                                    <span className="nav-sheet__arrow">↗</span>
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-        </>
-    );
+      <div className={`menu ${open ? 'is-open' : ''}`} aria-hidden={!open}>
+        <nav className="menu__list" aria-label="Chapters">
+          {SECTION_IDS.map((id) => (
+            <a key={id} href={`#${id}`} className="menu__item" onClick={close}>
+              <span className="menu__item-code">{CHAPTERS[id].code}</span>
+              <span className="menu__item-name">{CHAPTERS[id].name}</span>
+            </a>
+          ))}
+        </nav>
+        <div className="menu__foot">
+          <span>Amman · GMT+3</span>
+          <a href="mailto:fathii.alsadi@gmail.com" onClick={close}>fathii.alsadi@gmail.com</a>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default Navbar;
