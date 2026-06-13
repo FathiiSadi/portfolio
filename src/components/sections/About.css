@@ -76,6 +76,10 @@
 }
 
 @media (max-width: 700px) {
-  .about__beats { gap: 22vh; }
-  .about__beat { flex-direction: column; gap: 16px; }
+  .about { padding: 16vh 0 14vh; }
+  .about__beats { gap: 20vh; margin-top: 10vh; }
+  .about__beat { flex-direction: column; gap: 14px; }
+  .about__beat:nth-child(2) { margin-left: 0; }
+  .about__beat-idx { font-size: clamp(48px, 17vw, 84px); }
+  .about__beat-body { font-size: 14.5px; }
 }

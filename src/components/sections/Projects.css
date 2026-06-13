@@ -212,6 +212,7 @@
 .projects__end-link:hover { color: var(--cyan); }
 
 @media (max-width: 880px) {
+  .projects { padding: 14vh 0 12vh; }
   .proj,
   .proj--flip {
     grid-template-columns: 1fr;
@@ -221,6 +222,16 @@
   .proj--flip .proj__body { order: 2; text-align: left; }
   .proj--flip .proj__tags { justify-content: flex-start; }
   .proj--flip .proj__open { margin-left: 0; }
-  .projects__list { gap: 18vh; }
-  .projects__head { flex-direction: column; align-items: flex-start; margin-bottom: 10vh; }
+  .projects__list { gap: 16vh; }
+  .projects__head { flex-direction: column; align-items: flex-start; margin-bottom: 9vh; }
+
+  /* index/year ride above the media instead of floating */
+  .proj__meta,
+  .proj--flip .proj__meta {
+    position: static;
+    margin-bottom: 14px;
+  }
+  .proj--flip .proj__meta { justify-content: flex-end; }
+
+  .projects__end { flex-direction: column; gap: 12px; }
 }

@@ -165,13 +165,6 @@ const HeroEntity: React.FC<Props> = ({ reduced, mobile }) => {
 
     // intro converge once the loader hands over
     const introTarget = scrollState.started ? 1 : 0;
-    (window as unknown as Record<string, unknown>).__dbg = {
-      started: scrollState.started,
-      uIntro: mat.uniforms.uIntro.value,
-      uDisperse: mat.uniforms.uDisperse.value,
-      progress: scrollState.progress,
-      rects: Object.keys(scrollState.rects).length,
-    };
     mat.uniforms.uIntro.value = THREE.MathUtils.damp(
       mat.uniforms.uIntro.value, introTarget, 1.2, delta,
     );
@@ -206,7 +199,9 @@ const HeroEntity: React.FC<Props> = ({ reduced, mobile }) => {
   });
 
   return (
-    <group ref={groupRef} position={[1.45, 0, 0]}>
+    // narrow screens: pull the entity toward center and shrink it so the
+    // form reads behind the stacked hero text instead of cropping offscreen
+    <group ref={groupRef} position={[mobile ? 1.0 : 1.45, 0, 0]} scale={mobile ? 0.82 : 1}>
       <points geometry={geometry} frustumCulled={false}>
         <shaderMaterial
           ref={matRef}

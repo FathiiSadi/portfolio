@@ -124,3 +124,11 @@
   transform-origin: left;
   box-shadow: 0 0 14px rgba(0, 229, 255, 0.6);
 }
+
+@media (max-width: 480px) {
+  .loader__corner--tr,
+  .loader__corner--bl { display: none; }
+  .loader__eyebrow { font-size: 9px; letter-spacing: 0.22em; }
+  .loader__sub { font-size: 9.5px; letter-spacing: 0.2em; }
+  .loader__counter { font-size: 26px; }
+}

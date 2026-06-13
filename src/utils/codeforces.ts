@@ -71,3 +71,46 @@ export async function fetchCodeforcesStats(handle: string = "SolveXJo"): Promise
         return FALLBACK_DATA;
     }
 }
+
+/* ── Rating history — powers the animated rating graph ───────────── */
+
+export interface RatingPoint {
+    contest: string;
+    rating: number;
+}
+
+/* A plausible climb if the API is unreachable. */
+const FALLBACK_HISTORY: RatingPoint[] = [
+    { contest: 'Div. 4 — first blood', rating: 864 },
+    { contest: 'Div. 3', rating: 980 },
+    { contest: 'Div. 3', rating: 1064 },
+    { contest: 'Div. 2', rating: 1015 },
+    { contest: 'Div. 3', rating: 1132 },
+    { contest: 'Div. 2', rating: 1228 },
+    { contest: 'Educational', rating: 1190 },
+    { contest: 'Div. 2', rating: 1296 },
+    { contest: 'Div. 3', rating: 1389 },
+    { contest: 'Educational', rating: 1352 },
+    { contest: 'Div. 2', rating: 1444 },
+    { contest: 'Div. 2', rating: 1520 },
+    { contest: 'Educational', rating: 1471 },
+    { contest: 'Div. 2', rating: 1450 },
+];
+
+export async function fetchRatingHistory(handle: string = 'SolveXJo'): Promise<RatingPoint[]> {
+    try {
+        const res = await fetch(`https://codeforces.com/api/user.rating?handle=${handle}`);
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        if (data.status !== 'OK' || !Array.isArray(data.result) || data.result.length < 2) {
+            throw new Error(data.comment || 'no rating history');
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return data.result.map((c: any) => ({
+            contest: c.contestName as string,
+            rating: c.newRating as number,
+        }));
+    } catch {
+        return FALLBACK_HISTORY;
+    }
+}

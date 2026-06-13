@@ -234,3 +234,12 @@
   .contact-grid { grid-template-columns: 1fr; }
   .contact-meta { gap: 32px; }
 }
+
+@media (max-width: 600px) {
+  .contact { padding: 18vh 0 14vh; }
+  .contact-title { font-size: clamp(38px, 11.5vw, 64px); margin-bottom: 7vh; }
+  .contact-meta { flex-direction: column; gap: 20px; }
+  .contact-form-wrap { padding: 22px 18px; }
+  .field__q { font-size: 15.5px; }
+  .contact-line__label { width: 74px; }
+}
